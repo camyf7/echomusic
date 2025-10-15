@@ -58,6 +58,7 @@ export default function Topo() {
   return (
     <nav className="navbar">
       <div className="navbar-container">
+        
         {/* Logo */}
         <div className="logo">
           <img src={logo} alt="EchoMusic Logo" />
