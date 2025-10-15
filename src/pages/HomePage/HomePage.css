@@ -1,0 +1,611 @@
+/* ===== Global ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: "Inter", sans-serif;
+    background: #0a0f2c;
+    color: #fff;
+    line-height: 1.6;
+  }
+  
+  .container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  h1, h2, h3, h4 {
+    font-weight: 700;
+  }
+  
+  /* ===== Hero Section ===== */
+  .hero {
+    text-align: center;
+    padding: 6rem 2rem 4rem;
+    background: linear-gradient(180deg, #0a0f2c 0%, #101942 100%);
+  }
+  
+  .hero-title {
+    font-size: 3rem;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+  
+  .hero-title-accent {
+    color: #4f46e5;
+  }
+  
+  .hero-description {
+    margin: 1.5rem auto 2rem;
+    max-width: 600px;
+    font-size: 1.125rem;
+    color: #cbd5e1;
+  }
+  
+  .hero-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 3rem;
+  }
+  
+  /* Botões */
+  .btn {
+    border-radius: 9999px;
+    padding: 0.8rem 1.8rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  
+  .btn-primary {
+    background: #4f46e5;
+    color: white;
+    border: none;
+  }
+  
+  .btn-primary:hover {
+    background: #3730a3;
+  }
+  
+  .btn-outline {
+    background: transparent;
+    border: 2px solid #4f46e5;
+    color: #4f46e5;
+  }
+  
+  .btn-outline:hover {
+    background: #4f46e5;
+    color: white;
+  }
+  
+  /* ===== Music Player ===== */
+  .music-player {
+    background: #1e293b;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    max-width: 600px;
+    margin: 0 auto;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+  }
+  
+  .player-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .album-cover {
+    width: 50px;
+    height: 50px;
+    background: #4f46e5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.5rem;
+  }
+  
+  .song-info {
+    flex: 1;
+    margin-left: 1rem;
+  }
+  
+  .song-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+  
+  .song-artist {
+    font-size: 0.9rem;
+    color: #94a3b8;
+  }
+  
+  .heart-icon {
+    width: 24px;
+    height: 24px;
+    color: #f43f5e;
+    cursor: pointer;
+  }
+  
+  .player-controls {
+    margin: 1.5rem 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+  }
+  
+  .control-icon,
+  .play-icon {
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+  }
+  
+  .play-button {
+    background: #4f46e5;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .progress-bar {
+    background: #334155;
+    height: 6px;
+    border-radius: 4px;
+    margin: 1rem 0;
+    overflow: hidden;
+  }
+  
+  .progress-fill {
+    background: #4f46e5;
+    height: 100%;
+    width: 40%;
+  }
+  
+  .time-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: #94a3b8;
+  }
+  
+  /* ===== Section Base ===== */
+  .section {
+    padding: 4rem 2rem;
+    text-align: center;
+  }
+  
+  .section-title {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
+  }
+  
+  .section-description {
+    color: #94a3b8;
+    margin-bottom: 3rem;
+  }
+  
+  /* ===== Posts Grid ===== */
+  .posts-grid {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+  
+  .post-card {
+    background: #1e293b;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    text-align: left;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+  }
+  
+  .post-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .avatar img {
+    width: 40px;
+    height: 40px;
+    border-radius: 9999px;
+  }
+  
+  .user-info {
+    margin-left: 0.8rem;
+  }
+  
+  .username {
+    font-size: 1rem;
+    font-weight: 600;
+  }
+  
+  .handle {
+    font-size: 0.85rem;
+    color: #94a3b8;
+  }
+  
+  .post-actions {
+    margin-top: 1rem;
+    display: flex;
+    gap: 1.5rem;
+  }
+  
+  .action {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.9rem;
+    color: #94a3b8;
+    cursor: pointer;
+  }
+  
+  .action-icon {
+    width: 20px;
+    height: 20px;
+  }
+  
+  /* ===== Features Grid ===== */
+  .features-grid {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+  
+  .feature-card {
+    background: #1e293b;
+    border-radius: 1rem;
+    padding: 2rem;
+    text-align: center;
+  }
+  
+  .feature-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    color: white;
+  }
+  
+  .purple-blue { background: linear-gradient(135deg, #4f46e5, #9333ea); }
+  .pink-purple { background: linear-gradient(135deg, #ec4899, #8b5cf6); }
+  .blue-cyan   { background: linear-gradient(135deg, #3b82f6, #06b6d4); }
+  
+  /* ===== Communities Grid ===== */
+  .communities-grid {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+  
+  .community-card {
+    border-radius: 1rem;
+    padding: 2rem;
+    color: white;
+    text-align: center;
+  }
+  
+  .purple-blue-bg { background: linear-gradient(135deg, #4f46e5, #9333ea); }
+  .red-orange-bg  { background: linear-gradient(135deg, #ef4444, #f97316); }
+  .green-teal-bg  { background: linear-gradient(135deg, #22c55e, #14b8a6); }
+  .yellow-orange-bg { background: linear-gradient(135deg, #facc15, #f97316); }
+  
+  .community-icon {
+    width: 50px;
+    height: 50px;
+    margin: 0 auto 1rem;
+  }
+  
+  .community-name {
+    font-size: 1.3rem;
+    font-weight: 700;
+  }
+  
+  .community-members {
+    font-size: 0.9rem;
+    color: #e2e8f0;
+    margin-bottom: 0.5rem;
+  }
+  
+  .section-cta {
+    margin-top: 2rem;
+  }
+  
+  /* ===== Testimonials ===== */
+  .testimonials-grid {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+  
+  .testimonial-card {
+    background: #1e293b;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    text-align: left;
+  }
+  
+  .testimonial-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .stars {
+    display: flex;
+    gap: 0.3rem;
+    margin-top: 0.2rem;
+  }
+  
+  .star {
+    width: 16px;
+    height: 16px;
+    fill: #fbbf24;
+  }
+
+  /* ===== Animações Globais ===== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+/* Hero */
+.hero-title {
+  animation: fadeInUp 1s ease forwards;
+}
+
+.hero-description {
+  animation: fadeInUp 1s ease 0.3s forwards;
+  opacity: 0;
+}
+
+.hero-buttons {
+  animation: fadeInUp 1s ease 0.6s forwards;
+  opacity: 0;
+}
+
+/* Botões com efeito sutil */
+.btn {
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+.btn:hover {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.4);
+}
+
+/* Music Player com efeito de flutuar */
+.music-player {
+  animation: float 4s ease-in-out infinite;
+  transition: transform 0.3s ease;
+}
+.music-player:hover {
+  transform: scale(1.03);
+}
+
+/* Cards animando na entrada */
+.post-card, .feature-card, .community-card, .testimonial-card {
+  opacity: 0;
+  transform: translateY(30px);
+  animation: fadeInUp 0.8s ease forwards;
+}
+.post-card:nth-child(1) { animation-delay: 0.2s; }
+.post-card:nth-child(2) { animation-delay: 0.4s; }
+.post-card:nth-child(3) { animation-delay: 0.6s; }
+
+.feature-card:nth-child(1) { animation-delay: 0.2s; }
+.feature-card:nth-child(2) { animation-delay: 0.4s; }
+.feature-card:nth-child(3) { animation-delay: 0.6s; }
+
+/* Botão play pulsando */
+.play-button {
+  animation: pulse 2s infinite;
+}
+
+/* ===== Animações ===== */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Hero */
+.hero-title,
+.hero-description,
+.hero-buttons {
+  opacity: 0;
+  animation: fadeUp 0.8s ease forwards;
+}
+.hero-title {
+  animation-delay: 0.2s;
+}
+.hero-description {
+  animation-delay: 0.5s;
+}
+.hero-buttons {
+  animation-delay: 0.8s;
+}
+
+/* Botões interativos */
+.btn {
+  transition: transform 0.25s ease, box-shadow 0.3s ease;
+}
+.btn:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+}
+
+/* Cards animados */
+.post-card,
+.feature-card,
+.community-card,
+.testimonial-card {
+  opacity: 0;
+  transform: translateY(40px);
+  animation: fadeUp 0.8s ease forwards;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.post-card:nth-child(1) { animation-delay: 0.3s; }
+.post-card:nth-child(2) { animation-delay: 0.5s; }
+.post-card:nth-child(3) { animation-delay: 0.7s; }
+
+.feature-card:nth-child(1) { animation-delay: 0.3s; }
+.feature-card:nth-child(2) { animation-delay: 0.5s; }
+.feature-card:nth-child(3) { animation-delay: 0.7s; }
+
+.community-card,
+.testimonial-card {
+  animation-delay: 0.4s;
+}
+
+/* Hover nos cards */
+.post-card:hover,
+.feature-card:hover,
+.community-card:hover,
+.testimonial-card:hover {
+  transform: translateY(-8px) scale(1.03);
+  box-shadow: 0 12px 25px rgba(0,0,0,0.45);
+}
+
+/* Player interativo */
+.play-button {
+  transition: transform 0.3s ease;
+  animation: pulse 2s infinite;
+}
+.play-button:hover {
+  transform: scale(1.15);
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* ===== Animações ===== */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Hero */
+.hero-title,
+.hero-description,
+.hero-buttons {
+  opacity: 0;
+  animation: fadeUp 0.8s ease forwards;
+}
+.hero-title {
+  animation-delay: 0.2s;
+}
+.hero-description {
+  animation-delay: 0.5s;
+}
+.hero-buttons {
+  animation-delay: 0.8s;
+}
+
+/* Botões interativos */
+.btn {
+  transition: transform 0.25s ease, box-shadow 0.3s ease;
+}
+.btn:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+}
+
+/* Cards animados */
+.post-card,
+.feature-card,
+.community-card,
+.testimonial-card {
+  opacity: 0;
+  transform: translateY(40px);
+  animation: fadeUp 0.8s ease forwards;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.post-card:nth-child(1) { animation-delay: 0.3s; }
+.post-card:nth-child(2) { animation-delay: 0.5s; }
+.post-card:nth-child(3) { animation-delay: 0.7s; }
+
+.feature-card:nth-child(1) { animation-delay: 0.3s; }
+.feature-card:nth-child(2) { animation-delay: 0.5s; }
+.feature-card:nth-child(3) { animation-delay: 0.7s; }
+
+.community-card,
+.testimonial-card {
+  animation-delay: 0.4s;
+}
+
+/* Hover nos cards */
+.post-card:hover,
+.feature-card:hover,
+.community-card:hover,
+.testimonial-card:hover {
+  transform: translateY(-8px) scale(1.03);
+  box-shadow: 0 12px 25px rgba(0,0,0,0.45);
+}
+
+/* Player interativo */
+.play-button {
+  transition: transform 0.3s ease;
+  animation: pulse 2s infinite;
+}
+.play-button:hover {
+  transform: scale(1.15);
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+  
+  

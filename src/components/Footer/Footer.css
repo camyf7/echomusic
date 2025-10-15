@@ -1,0 +1,147 @@
+.footer {
+  position: relative;
+  background: #0a1540;
+  color: #cdd4f3;
+  padding: 60px 80px 40px;
+  overflow: hidden;
+}
+
+/* Ondas animadas */
+.waves {
+  position: absolute;
+  top: -80px;
+  left: 0;
+  width: 100%;
+  height: 100px;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.wave {
+  position: absolute;
+  width: 200%;
+  height: 100px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 100% 50%;
+  animation: waveMove 8s linear infinite;
+}
+
+#wave1 { bottom: 0; animation-delay: 0s; }
+#wave2 { bottom: 10px; opacity: 0.5; animation-delay: -2s; }
+#wave3 { bottom: 20px; opacity: 0.3; animation-delay: -4s; }
+#wave4 { bottom: 30px; opacity: 0.1; animation-delay: -6s; }
+
+@keyframes waveMove {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Conteúdo */
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 40px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Brand */
+.footer-brand {
+  max-width: 300px;
+}
+
+.footer-brand .logo {
+  font-size: 20px;
+  font-weight: bold;
+  background: linear-gradient(90deg, #ff4ecf, #7d5fff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.footer-brand p {
+  font-size: 14px;
+  margin: 12px 0;
+  color: #a6b2da;
+}
+
+/* Socials */
+.socials {
+  display: flex;
+  gap: 12px;
+}
+
+.socials a {
+  display: grid;
+  place-items: center;
+  width: 35px;
+  height: 35px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+  color: #fff;
+  transition: 0.3s;
+}
+
+.socials a:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.1);
+}
+
+/* Links */
+.footer-links h3 {
+  color: #c7a6ff;
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
+.footer-links ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-links li {
+  margin: 6px 0;
+}
+
+.footer-links a {
+  color: #cdd4f3;
+  text-decoration: none;
+  font-size: 14px;
+  transition: 0.3s;
+}
+
+.footer-links a:hover {
+  color: #fff;
+}
+
+/* Rodapé inferior */
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding-top: 20px;
+  margin-top: 30px;
+  font-size: 12px;
+  color: #8893b5;
+}
+
+.footer-legal {
+  display: flex;
+  gap: 15px;
+}
+
+.footer-legal a {
+  color: #8893b5;
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+.footer-legal a:hover {
+  color: #fff;
+}
+
+
+
+  
