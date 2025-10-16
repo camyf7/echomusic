@@ -35,6 +35,7 @@ export default function Topo() {
     { to: "/salas", label: "Salas ao vivo" },
     { to: "/comunidades", label: "Comunidades" },
     { to: "/sobre", label: "Sobre" },
+    
   ];
 
   useEffect(() => {
@@ -127,10 +128,11 @@ export default function Topo() {
             )}
           </div>
 
-          {/* Avatar */}
-          <div className="avatar">
-            <img src={luana} alt="Perfil" />
-          </div>
+          {/* Avatar clicável */}
+        <Link to="/perfil" className="avatar">
+      <img src={luana} alt="Perfil" />
+      </Link>
+
 
           {/* Mobile Menu Button */}
           <button

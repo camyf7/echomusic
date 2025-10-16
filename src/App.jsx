@@ -10,6 +10,7 @@ import Discover from "./pages/Discover";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 import SalasAoVivo from "./pages/Rooms";
+import Profile from "./pages/Profile";
 
 import "./index.css";
 import Rooms from "./pages/Rooms";
@@ -28,6 +29,7 @@ function App() {
           <Route path="/descobrir" element={<Discover />} />
           <Route path="/salas" element={<SalasAoVivo />} />
           <Route path="/sobre" element={<About />} />
+          <Route path="/perfil" element={<Profile />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
