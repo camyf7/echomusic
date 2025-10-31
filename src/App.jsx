@@ -11,6 +11,7 @@ import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 import SalasAoVivo from "./pages/Rooms";
 import Profile from "./pages/Profile";
+import Community from "./pages/Community";
 
 import "./index.css";
 import Rooms from "./pages/Rooms";
@@ -30,6 +31,7 @@ function App() {
           <Route path="/salas" element={<SalasAoVivo />} />
           <Route path="/sobre" element={<About />} />
           <Route path="/perfil" element={<Profile />} />
+          <Route path="/comunidades" element={<Community />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
