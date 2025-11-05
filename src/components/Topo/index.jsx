@@ -1,159 +1,217 @@
-import React, { useState, useEffect, useRef } from "react";
-import "./Topo.css";
-import { Menu, X, Search, Bell, Music } from "lucide-react";
-import { Link } from "react-router-dom";
+"use client"
 
-import luana from "../../assets/host_luana.jpeg";
-import starboy from "../../assets/musica_starboy.png";
-import after from "../../assets/after.jpeg";
-import Blinding from "../../assets/blinding.jpeg";
-
-const logo = "/logo.png"; // certifique-se que tem essa imagem na pasta public
+import "./Topo.css"
+import { Link, useNavigate } from "react-router-dom"
+import { useEffect, useState } from "react"
+import {
+  FaAngleDown,
+  FaBell,
+  FaHeart,
+  FaMusic,
+  FaCog,
+  FaSignOutAlt,
+  FaUser,
+} from "react-icons/fa"
+import { isLogged, doLogout, getUser } from "../../lib/authHandler"
+import { useAuth } from "../../contexts/AuthContext"
+import logo from "../../assets/logo.png"
 
 export default function Topo() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const [showSearchResults, setShowSearchResults] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
-  const searchRef = useRef(null);
+  const { logged, user, setLogged, setUser } = useAuth()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [notificationOpen, setNotificationOpen] = useState(false)
+  const navigate = useNavigate()
 
-  const searchResults = [
-    { type: "artist", name: "The Weeknd", image: starboy },
-    { type: "song", name: "Blinding Lights", artist: "The Weeknd", image: Blinding },
-    { type: "album", name: "After Hours", artist: "The Weeknd", image: after },
-  ];
-
-  const notifications = [
-    { id: 1, text: "Nova música adicionada: The Weeknd lançou um novo single" },
-    { id: 2, text: "Playlist atualizada: Sua playlist favorita tem novas músicas" },
-  ];
-
-  const navLinks = [
-    { to: "/", label: "Home" },
-    { to: "/descobrir", label: "Descobrir" },
-    { to: "/salas", label: "Salas ao vivo" },
-    { to: "/comunidades", label: "Comunidades" },
-    { to: "/sobre", label: "Sobre" },
-    
-  ];
-
+  // 🔐 Verifica login e atualiza dados
   useEffect(() => {
-    function handleClickOutside(event) {
-      if (searchRef.current && !searchRef.current.contains(event.target)) {
-        setShowSearchResults(false);
-        setIsSearchFocused(false);
-      }
-      if (!event.target.closest(".notifications-container")) {
-        setShowNotifications(false);
+    const checkLogin = () => {
+      const loggedIn = isLogged()
+      setLogged(loggedIn)
+      if (loggedIn) {
+        const userData = getUser()
+        setUser(userData)
+      } else {
+        setUser(null)
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
+    checkLogin()
+    const handleStorageChange = (e) => {
+      if (e.key === "token" || e.key === "user") checkLogin()
+    }
+    window.addEventListener("storage", handleStorageChange)
+    return () => window.removeEventListener("storage", handleStorageChange)
+  }, [setLogged, setUser])
+
+  // 🚪 Logout
+  const handleLogout = () => {
+    doLogout()
+    setLogged(false)
+    setUser(null)
+    navigate("/signin")
+  }
+
+  // 🔔 Notificações
+  const handleNotificationClick = (e) => {
+    e.stopPropagation()
+    setNotificationOpen(!notificationOpen)
+    setMenuOpen(false)
+  }
+
+  // 👤 Menu do perfil
+  const handleProfileClick = (e) => {
+    e.stopPropagation()
+    setMenuOpen(!menuOpen)
+    setNotificationOpen(false)
+  }
+
+  // ❌ Fecha menus ao clicar fora
   useEffect(() => {
-    setShowSearchResults(searchQuery.length > 0 && isSearchFocused);
-  }, [searchQuery, isSearchFocused]);
+    const handleClickOutside = (e) => {
+      if (
+        !e.target.closest(".profileContainer") &&
+        !e.target.closest(".notificationContainer")
+      ) {
+        setMenuOpen(false)
+        setNotificationOpen(false)
+      }
+    }
+    document.addEventListener("click", handleClickOutside)
+    return () => document.removeEventListener("click", handleClickOutside)
+  }, [])
 
   return (
-    <nav className="navbar">
-      <div className="navbar-container">
-        
-        {/* Logo */}
-        <div className="logo">
-          <img src={logo} alt="EchoMusic Logo" />
-        </div>
-
-        {/* Links Desktop */}
-        <div className="nav-links-desktop">
-          {navLinks.map((link) => (
-            <Link key={link.to} to={link.to}>
-              {link.label}
-            </Link>
-          ))}
-        </div>
-
-        {/* Direita */}
-        <div className="nav-right">
-          {/* Search */}
-          <div ref={searchRef} className="search-container">
-            <Search className="search-icon" />
-            <input
-              type="text"
-              placeholder="Buscar músicas, artistas, álbuns..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={() => setIsSearchFocused(true)}
-            />
-            {showSearchResults && (
-              <div className="search-results">
-                {searchResults.map((result, i) => (
-                  <div
-                    key={i}
-                    className="result-item"
-                    onClick={() => setSearchQuery("")}
-                  >
-                    {result.image && <img src={result.image} alt={result.name} />}
-                    <div>
-                      <div>{result.name}</div>
-                      <div>{result.type === "song" ? result.artist : result.type}</div>
-                    </div>
-                    <Music className="result-icon" />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Notifications */}
-          <div className="notifications-container">
-            <div
-              className="notifications"
-              onClick={() => setShowNotifications(!showNotifications)}
-            >
-              <Bell />
-              {notifications.length > 0 && (
-                <span className="notification-dot">{notifications.length}</span>
-              )}
-            </div>
-            {showNotifications && (
-              <div className="notifications-dropdown">
-                {notifications.map((note) => (
-                  <div key={note.id} className="notification-item">
-                    {note.text}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Avatar clicável */}
-        <Link to="/perfil" className="avatar">
-      <img src={luana} alt="Perfil" />
-      </Link>
-
-
-          {/* Mobile Menu Button */}
-          <button
-            className="mobile-menu-btn"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            {isMenuOpen ? <X /> : <Menu />}
-          </button>
-        </div>
+    <header className="header-dark">
+      {/* LOGO */}
+      <div className="logo">
+        <Link to="/">
+          <img src={logo} alt="EchoMusic" className="logo-img" />
+        </Link>
       </div>
 
-      {/* Mobile Menu */}
-      {isMenuOpen && (
-        <div className="mobile-menu">
-          {navLinks.map((link) => (
-            <Link key={link.to} to={link.to} onClick={() => setIsMenuOpen(false)}>
-              {link.label}
-            </Link>
-          ))}
+      {/* NAVBAR */}
+      <nav className="main-nav">
+        <ul>
+          <li><Link to="/">Home</Link></li>
+          <li><Link to="/descobrir">Descobrir</Link></li>
+          <li><Link to="/salas">Salas ao vivo</Link></li>
+          <li><Link to="/comunidades">Comunidades</Link></li>
+          <li><Link to="/sobre">Sobre</Link></li>
+        </ul>
+      </nav>
+
+      {/* BARRA DE PESQUISA */}
+      <div className="search-bar-dark">
+        <input type="text" placeholder="Buscar músicas, artistas..." />
+        <button className="search-btn-dark">
+          <ion-icon name="search-outline"></ion-icon>
+        </button>
+      </div>
+
+      {/* AÇÕES DO TOPO */}
+      <div className="header-actions-dark">
+        {logged ? (
+          <>
+            {/* 🔔 NOTIFICAÇÕES */}
+            <div className="notificationContainer">
+              <button
+                className="notification-btn-dark"
+                onClick={handleNotificationClick}
+                aria-label="Notificações"
+              >
+                <FaBell size={20} />
+                <span className="notification-badge-dark">3</span>
+              </button>
+
+              {notificationOpen && (
+                <div className="notification-dropdown-dark">
+                  <div className="notification-header-dark">
+                    <h3>Notificações</h3>
+                  </div>
+                  <div className="notification-list-dark">
+                    <div className="notification-item-dark">
+                      <p>João curtiu sua música 🎧</p>
+                      <span className="time">há 2 horas</span>
+                    </div>
+                    <div className="notification-item-dark">
+                      <p>Nova sala ao vivo começou 🔥</p>
+                      <span className="time">há 1 hora</span>
+                    </div>
+                    <div className="notification-item-dark">
+                      <p>Você tem um novo seguidor 👋</p>
+                      <span className="time">há 30 minutos</span>
+                    </div>
+                  </div>
+                  <button className="notification-footer-dark">
+                    Ver todas
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* 👤 Perfil */}
+<div className="profileContainer">
+  <div className="profileBtn-dark">
+    <Link to="/profile" className="profileLink">
+      {user?.photoURL ? (
+        <img src={user.photoURL} alt={user?.name} className="profileImg" />
+      ) : (
+        <div className="profileImg-placeholder-dark">
+          {user?.name?.charAt(0)?.toUpperCase() || "U"}
         </div>
       )}
-    </nav>
-  );
+      <span>{user?.name?.split(" ")[0]}</span>
+    </Link>
+
+    <button className="profileArrowBtn" onClick={() => setMenuOpen(!menuOpen)}>
+      <FaAngleDown size={16} className="arrow" />
+    </button>
+  </div>
+
+  {menuOpen && (
+    <div className="profile-dropdown-dark">
+      <ul>
+        <li>
+        <Link to="/profile" className="profileLink">
+            <FaUser style={{ marginRight: "8px" }} /> Perfil
+          </Link>
+        </li>
+        <li>
+          <Link to="/favoritos">
+            <FaHeart style={{ marginRight: "8px" }} /> Favoritos
+          </Link>
+        </li>
+        <li>
+          <Link to="/minhas-musicas">
+            <FaMusic style={{ marginRight: "8px" }} /> Minhas músicas
+          </Link>
+        </li>
+        <li>
+          <Link to="/configuracoes">
+            <FaCog style={{ marginRight: "8px" }} /> Configurações
+          </Link>
+        </li>
+        <li onClick={handleLogout}>
+          <FaSignOutAlt style={{ marginRight: "8px" }} /> Sair
+        </li>
+      </ul>
+    </div>
+  )}
+</div>
+
+          </>
+        ) : (
+          // 🔐 Links de login/registro
+          <div className="auth-links">
+            <Link to="/signin" className="btn-login-dark">
+              Entrar
+            </Link>
+            <Link to="/signup" className="btn-register-dark">
+              Registrar
+            </Link>
+          </div>
+        )}
+      </div>
+    </header>
+  )
 }

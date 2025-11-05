@@ -9,12 +9,12 @@ import LoginPage from "./pages/LoginPage";
 import Discover from "./pages/Discover";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
-import SalasAoVivo from "./pages/Rooms";
 import Profile from "./pages/Profile";
 import Community from "./pages/Community";
-
-import "./index.css";
+import SignUp from "./pages/SignUp";
+import Signin from "./pages/Signin";
 import Rooms from "./pages/Rooms";
+import EditProfile from "./pages/editProfile";
 
 function App() {
   return (
@@ -26,12 +26,15 @@ function App() {
       <main className="min-h-screen">
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/signin" element={<Signin />} />
+          <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/descobrir" element={<Discover />} />
-          <Route path="/salas" element={<SalasAoVivo />} />
+          <Route path="/salas" element={<Rooms />} />
           <Route path="/sobre" element={<About />} />
-          <Route path="/perfil" element={<Profile />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/comunidades" element={<Community />} />
+          <Route path="/editprofile" element={<EditProfile />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>

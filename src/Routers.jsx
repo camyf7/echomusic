@@ -1,10 +1,11 @@
 import { Routes, Route } from 'react-router-dom';
-import HomePage from './pages/HomePage';   // nome alinhado
-import Discover from './pages/Discover'; // nome alinhado
+import HomePage from './pages/HomePage';
+import Discover from './pages/Discover';
 import Community from "./pages/Community";
 import NotFound from './pages/NotFound';
 import About from './pages/About';
-
+import Profile from './pages/Profile';
+import EditProfile from './pages/editProfile';
 
 export default function Routers() {
   return (
@@ -13,12 +14,9 @@ export default function Routers() {
       <Route path="/discover" element={<Discover />} />
       <Route path="/about" element={<About />} />
       <Route path="/comunidades" element={<Community />} />
-
-      {/* Rota coringa para 404 */}
+      <Route path="/profile" element={<Profile />} />
+      <Route path="/editprofile" element={<EditProfile />} />
       <Route path="*" element={<NotFound />} /> 
-    
     </Routes>
   );
 }
-
-
