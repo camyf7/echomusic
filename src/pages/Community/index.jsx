@@ -74,11 +74,13 @@ const Communities = () => {
   ];
 
   const discoverCommunities = [
-    { name: "Eletrônica Brasil", icon: "🎧", description: "Sons eletrônicos, techno, ambient e a cena eletrônica brasileira" },
+    { name: "Eletrônica Brasil", icon: "🎧", description: "Sons eletrônicos, techno, ambiente e a cena eletrônica brasileira" },
     { name: "Hip Hop Nacional", icon: "🎤", description: "Rap, trap e toda a cultura hip hop brasileira" },
   ];
 
   const trending = ["#NovoAlbumCaetano", "#RockInRio2025", "#IndieDescoberta", "#SambaModerno"];
+
+  
 
   return (
     <div className="communities-container">
@@ -113,7 +115,7 @@ const Communities = () => {
         <div className="content-left">
           <section className="feed-section">
             <div className="section-header">
-              <h2 className="section-title">
+              <h2 className="section-title-left">
                 <LuMusic size={24} /> Feed das Comunidades
               </h2>
               <div className="feed-tabs category-tabs">
@@ -194,7 +196,8 @@ const Communities = () => {
                       onClick={() => toggleLike(post.id)}
                     >
                       <LuHeart size={18} fill={likedPosts[post.id] ? "#ff4444" : "none"} />
-                      <span>{post.likes + (likedPosts[post.id] ? 1 : 0)}</span>
+                      <span>{(Number(post.likes) || 0) + (likedPosts[post.id] ? 1 : 0)}</span>
+
                     </button>
                     <button className="action-btn">
                       <LuMessageCircle size={18} />
@@ -246,7 +249,7 @@ const Communities = () => {
 
           {/* Descubra Comunidades */}
           <section className="sidebar-section">
-            <h3 className="section-title">
+            <h3 className="section-title-discover">
               <LuSearch size={20} /> Descubra Comunidades
             </h3>
             {discoverCommunities.map((dc, i) => (
