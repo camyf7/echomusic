@@ -1,288 +1,336 @@
+// src/pages/Profile/index.jsx
 "use client";
 
-import { useState } from "react";
-import "./Profile.css";
-import users from "../../assets/users.jpg";
-import ocean from "../../assets/musica_ocean.jpeg";
-import pedro from "../../assets/usario_pedro.jpeg";
-import isabelle from "../../assets/usario_isabelle.png";
-import papoulas from "../../assets/musica_papoulas.png";
-import sera from "../../assets/musica_sera.jpeg";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import "./Profile.css";
 
+import placeholderAvatar from "../../assets/users.jpg";
+import placeholderBanner from "../../assets/musica_ocean.jpeg";
 
-const Profile = () => {
-  const [activeTab, setActiveTab] = useState("atividade");
+export default function Profile() {
   const [privacySettings, setPrivacySettings] = useState({
     perfilPublico: true,
     atividadeVisivel: true,
     playlistsPublicas: false,
   });
 
-  // Dados do usuário (agora com estado para foto editável)
   const [userData, setUserData] = useState({
-    name: "User@07",
-    username: "@user.com",
-    memberSince: "Membro desde x",
-    bio: "altere sua bio nas configurações de edição de perfil.",
-    avatar: users,
-    stats: {
-      playlists: "1.2K",
-      horasOuvidas: "23",
-      seguidores: "156",
-    },
+    name: "Usuário",
+    username: "@user",
+    email: "",
+    memberSince: "Membro desde 2025",
+    bio: "Adicione uma bio personalizada no seu perfil ✨",
+    avatar: "",
+    banner: "",
+    stats: { playlists: 0, horasOuvidas: 0, seguidores: 0 },
   });
 
-  // Função para trocar foto de perfil
-  const handleAvatarChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setUserData((prev) => ({ ...prev, avatar: imageUrl }));
+  // helper: chave de storage por usuário
+  const getProfileKey = () => {
+    const googleUserRaw = localStorage.getItem("googleUser");
+    if (googleUserRaw) {
+      try {
+        const googleUser = JSON.parse(googleUserRaw);
+        if (googleUser?.email) return `profile_${googleUser.email}`;
+      } catch {}
+    }
+    return "userProfile";
+  };
+
+  // load profile at mount
+  useEffect(() => {
+    const key = getProfileKey();
+    const saved = localStorage.getItem(key);
+    if (saved) {
+      try {
+        setUserData(JSON.parse(saved));
+      } catch {
+        // ignore parse error
+      }
+      return;
+    }
+
+    // if googleUser exists but no saved profile, create default from googleUser
+    const googleUserRaw = localStorage.getItem("googleUser");
+    if (googleUserRaw) {
+      try {
+        const googleUser = JSON.parse(googleUserRaw);
+        const newProfile = {
+          name: googleUser.name || "Usuário",
+          username: `@${(googleUser.email || "user").split("@")[0]}`,
+          email: googleUser.email || "",
+          memberSince: "Membro desde 2025",
+          bio: "Olá, este é meu perfil 🎧",
+          avatar: googleUser.photoURL || "",
+          banner: "",
+          stats: { playlists: 12, horasOuvidas: 42, seguidores: 156 },
+        };
+        setUserData(newProfile);
+        localStorage.setItem(key, JSON.stringify(newProfile));
+      } catch {}
+    } else {
+      // fallback: keep default userData or existing userProfile (already handled above)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // listen storage (so changes from EditProfile or other tabs update)
+  useEffect(() => {
+    const onStorage = (e) => {
+      if (!e.key) return;
+      const key = getProfileKey();
+      if (e.key === key) {
+        const updated = localStorage.getItem(key);
+        if (updated) {
+          try {
+            setUserData(JSON.parse(updated));
+          } catch {}
+        }
+      }
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
+
+  // persist helper (also dispatch storage event for same-tab updates)
+  const persistProfile = (updatedProfile) => {
+    setUserData(updatedProfile);
+    const key = updatedProfile.email ? `profile_${updatedProfile.email}` : getProfileKey();
+    localStorage.setItem(key, JSON.stringify(updatedProfile));
+    // try dispatch so same-tab components that listen to storage see change
+    try {
+      window.dispatchEvent(
+        new StorageEvent("storage", { key, newValue: JSON.stringify(updatedProfile) })
+      );
+    } catch {
+      // some browsers disallow creating StorageEvent; not critical
     }
   };
 
-  const handlePrivacyToggle = (setting) => {
-    setPrivacySettings((prev) => ({ ...prev, [setting]: !prev[setting] }));
+  // avatar upload (Profile)
+  const handleAvatarChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const imageUrl = reader.result; // dataURL
+      const updated = { ...userData, avatar: imageUrl };
+      persistProfile(updated);
+    };
+    reader.readAsDataURL(file);
   };
 
-  // Atividades recentes
-  const recentActivities = [
-    { id: 1, type: "playlist", title: "Criou uma nova playlist", subtitle: "Domingo Chill", time: "há 2 horas", details: "15 músicas • 1h 30min", icon: "🎵" },
-    { id: 2, type: "like", title: "Curtiu uma música", subtitle: "EudiRicris", time: "há 5 horas", details: "Chillsteps & Xanax", icon: "❤️" },
-    { id: 3, type: "follow", title: "Seguiu um novo artista", subtitle: "Luisa Sonza", time: "há 1 dia", details: "Artista • 2.3M ouvintes mensais", icon: "👤" },
-  ];
-
-  // DNA Musical
-  const musicalDNA = [
-    { genre: "Rock Nacional", percentage: 92, color: "#8B5CF6" },
-    { genre: "MPB", percentage: 78, color: "#EC4899" },
-    { genre: "Sertanejo", percentage: 65, color: "#3B82F6" },
-    { genre: "Pop", percentage: 51, color: "#10B981" },
-  ];
-
-  // Conexões Musicais
-  const musicalConnections = {
-    friends: [
-      { name: "Maria Silva", avatar: isabelle, commonGenres: "Amiga em comum" },
-      { name: "João Santos", avatar: pedro, commonGenres: "Amigo em comum" },
-    ],
-    collaborativePlaylists: [
-      { name: "Road Trip 2024", creator: "Você e Maria • 45 músicas", avatar: papoulas },
-      { name: "Festa de Aniversário", creator: "Você e 3 amigos • 67 músicas", avatar: sera },
-    ],
+  // banner upload (Profile)
+  const handleBannerChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const imageUrl = reader.result;
+      const updated = { ...userData, banner: imageUrl };
+      persistProfile(updated);
+    };
+    reader.readAsDataURL(file);
   };
 
-  // Conquistas
-  const achievements = [
-    { id: 1, name: "Descobridor Musical", description: "Criou 5 playlists diferentes", icon: "🎧", unlocked: true },
-    { id: 2, name: "Fã Assíduo", description: "Ouviu 10 artistas diferentes em uma semana", icon: "⭐", unlocked: true },
-    { id: 3, name: "Curador de Hits", description: "Compartilhou 20 músicas com amigos", icon: "📱", unlocked: false },
-    { id: 4, name: "Maratonista Musical", description: "Ouviu música por 24h seguidas", icon: "🎵", unlocked: false },
-  ];
+  const handlePrivacyToggle = (key) =>
+    setPrivacySettings((prev) => ({ ...prev, [key]: !prev[key] }));
+
+  const getInitial = (name) => (name ? name.charAt(0).toUpperCase() : "?");
+  const stats = userData.stats || { playlists: 0, horasOuvidas: 0, seguidores: 0 };
 
   return (
-    <div className="profile-container">
-      {/* Header */}
-      <div className="profile-header">
-        <div className="wave-background"></div>
-        <div className="profile-header-content">
-          <div className="profile-info">
-            <div className="profile-avatar-wrapper">
-              <label htmlFor="avatar-upload" className="profile-avatar">
-                <img src={userData.avatar} alt="Avatar do usuário" />
-                <div className="change-avatar-overlay">Trocar foto</div>
-              </label>
-              <input
-                id="avatar-upload"
-                type="file"
-                accept="image/*"
-                style={{ display: "none" }}
-                onChange={handleAvatarChange}
-              />
-              <div className="online-indicator"></div>
-            </div>
+    <div className="profile-page">
+      {/* Banner */}
+      <div
+        className="profile-banner"
+        style={{
+          backgroundImage: `url(${userData.banner || placeholderBanner})`,
+        }}
+      >
+        <label htmlFor="banner-upload" className="banner-edit-btn" title="Trocar banner">
+          <svg width="16" height="16" viewBox="0 0 24 24">
+            <path
+              fill="white"
+              d="M5 20h14v-2H5v2zm7-18C9.13 2 7 4.13 7 7c0 .87.28 1.68.76 2.35L5 14h14l-2.76-4.65C16.72 8.68 17 7.87 17 7c0-2.87-2.13-5-5-5z"
+            />
+          </svg>
+        </label>
+        <input id="banner-upload" type="file" accept="image/*" onChange={handleBannerChange} style={{ display: "none" }} />
 
-            <div className="profile-details">
-              <h1 className="profile-name">{userData.name}</h1>
-              <p className="profile-username">
-                {userData.username} • {userData.memberSince}
-              </p>
-              <p className="profile-bio">{userData.bio}</p>
+        <div className="profile-banner-overlay">
+          <div className="profile-header-inner">
+            {/* Avatar + info */}
+            <div className="profile-left">
+              <div className="avatar-block">
+                <label htmlFor="avatar-upload" className="avatar-label" title="Trocar foto">
+                  {userData.avatar ? (
+                    <img src={userData.avatar} alt="avatar" className="avatar-img" />
+                  ) : (
+                    <div className="avatar-initial">{getInitial(userData.name)}</div>
+                  )}
+                  <div className="avatar-edit-icon">
+                    <svg width="14" height="14" viewBox="0 0 24 24">
+                      <path fill="white" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM21.41 6.34a1.25 1.25 0 0 0 0-1.77l-2-2a1.25 1.25 0 0 0-1.77 0l-1.83 1.83 3.75 3.75 1.85-1.81z" />
+                    </svg>
+                  </div>
+                </label>
+                <input id="avatar-upload" type="file" accept="image/*" onChange={handleAvatarChange} style={{ display: "none" }} />
+              </div>
 
-              <div className="profile-stats">
-                <div className="stat-item">
-                  <span className="stat-value">{userData.stats.playlists}</span>
-                  <span className="stat-label">Playlists</span>
+              <div className="profile-meta">
+                <h1 className="profile-name">{userData.name}</h1>
+                <div className="profile-sub">
+                  <span className="username">{userData.username}</span>
+                  <span className="dot">•</span>
+                  <span className="member-since">{userData.memberSince}</span>
                 </div>
-                <div className="stat-divider"></div>
-                <div className="stat-item">
-                  <span className="stat-value">{userData.stats.horasOuvidas}</span>
-                  <span className="stat-label">Horas Ouvidas</span>
-                </div>
-                <div className="stat-divider"></div>
-                <div className="stat-item">
-                  <span className="stat-value">{userData.stats.seguidores}</span>
-                  <span className="stat-label">Seguidores</span>
+                <p className="profile-bio">{userData.bio}</p>
+
+                <div className="profile-stats">
+                  <div className="stat">
+                    <div className="stat-value">{stats.playlists}</div>
+                    <div className="stat-label">Playlists</div>
+                  </div>
+                  <div className="stat-divider" />
+                  <div className="stat">
+                    <div className="stat-value">{stats.horasOuvidas}</div>
+                    <div className="stat-label">Horas Ouvidas</div>
+                  </div>
+                  <div className="stat-divider" />
+                  <div className="stat">
+                    <div className="stat-value">{stats.seguidores}</div>
+                    <div className="stat-label">Seguidores</div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="profile-actions">
-  <Link to="/editprofile" className="btn-primary">
-    Editar Perfil
-  </Link>
-  <button className="btn-secondary">Compartilhar</button>
-</div>
+            {/* Actions */}
+            <div className="profile-actions-area">
+              <Link to="/editprofile" className="btn btn-edit">Editar Perfil</Link>
+              <button className="btn btn-share" onClick={() => { navigator.clipboard?.writeText(window.location.href); alert("Link copiado!"); }}>Compartilhar</button>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Conteúdo Principal */}
-      <div className="profile-content">
-        {/* Lado Esquerdo */}
-        <div className="content-left">
-          {/* Atividade Recente */}
-          <section className="section">
-            <div className="section-header">
-              <h2>Atividade Recente</h2>
-              <a href="#" className="link-primary">Ver Tudo</a>
+      {/* Main content */}
+      <div className="container grid">
+        <div className="left-col">
+          {/* Activity */}
+          <section className="card">
+            <div className="card-header">
+              <h3>Atividade Recente</h3>
+              <a className="link-primary" href="#">Ver Tudo</a>
             </div>
             <div className="activity-list">
-              {recentActivities.map((activity) => (
-                <div key={activity.id} className="activity-item">
-                  <div className="activity-icon">{activity.icon}</div>
-                  <div className="activity-content">
-                    <div className="activity-main">
-                      <span className="activity-title">{activity.title}</span>
-                      <span className="activity-time">{activity.time}</span>
-                    </div>
-                    <p className="activity-subtitle">{activity.subtitle}</p>
-                    <p className="activity-details">{activity.details}</p>
+              {[
+                { id: 1, title: "Criou uma nova playlist", subtitle: "Domingo Chill", time: "há 2 horas", icon: "🎵" },
+                { id: 2, title: "Curtiu uma música", subtitle: "Evidências — Chitãozinho & Xororó", time: "há 5 horas", icon: "❤️" },
+                { id: 3, title: "Seguiu um novo artista", subtitle: "Luísa Sonza", time: "ontem", icon: "👤" },
+              ].map((a) => (
+                <div key={a.id} className="activity-item">
+                  <div className="activity-icon">{a.icon}</div>
+                  <div className="activity-body">
+                    <div className="activity-title">{a.title}</div>
+                    <div className="activity-sub">{a.subtitle}</div>
+                  </div>
+                  <div className="activity-time">{a.time}</div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Playlists */}
+          <section className="card">
+            <div className="card-header">
+              <h3>Minhas Playlists</h3>
+              <button className="btn btn-small">+ Nova Playlist</button>
+            </div>
+            <div className="playlists-grid">
+              {["Domingo Chill", "Rock Nacional", "Noite Romântica"].map((name, i) => (
+                <div className="playlist-card" key={i}>
+                  <div className="cover" style={{ backgroundImage: `url(${placeholderBanner})` }} />
+                  <div className="playlist-info">
+                    <div className="playlist-name">{name}</div>
+                    <div className="playlist-meta">15 músicas • 1h 22min</div>
+                  </div>
+                </div>
+              ))}
+              <div className="playlist-card empty">
+                <div className="placeholder">Criar nova playlist</div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        {/* Right column */}
+        <aside className="right-col">
+          <section className="card dna-card">
+            <h3>Meu DNA Musical</h3>
+            <div className="dna-list">
+              {[
+                { genre: "Rock Nacional", percentage: 82, color: "#8B5CF6" },
+                { genre: "MPB", percentage: 24, color: "#EC4899" },
+                { genre: "Sertanejo", percentage: 18, color: "#3B82F6" },
+                { genre: "Pop", percentage: 12, color: "#10B981" },
+              ].map((g, i) => (
+                <div key={i} className="genre-row">
+                  <div className="genre-left">
+                    <div className="genre-name">{g.genre}</div>
+                    <div className="genre-percent">{g.percentage}%</div>
+                  </div>
+                  <div className="genre-bar">
+                    <div className="genre-progress" style={{ width: `${g.percentage}%`, background: g.color }} />
                   </div>
                 </div>
               ))}
             </div>
           </section>
 
-          {/* Conexões Musicais */}
-          <section className="section">
-            <div className="section-header">
-              <h2>Conexões Musicais</h2>
-              <a href="#" className="link-primary">Ver Todos</a>
-            </div>
-            <div className="connections-section">
-              <h3 className="subsection-title">AMIGOS EM COMUM</h3>
-              <div className="friends-list">
-                {musicalConnections.friends.map((friend, index) => (
-                  <div key={index} className="friend-item">
-                    <div className="friend-avatar">
-                      <img src={friend.avatar} alt={friend.name} />
-                    </div>
-                    <div className="friend-info">
-                      <p className="friend-name">{friend.name}</p>
-                      <p className="friend-common">{friend.commonGenres}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <h3 className="subsection-title">PLAYLISTS COLABORATIVAS</h3>
-              <div className="collaborative-playlists">
-                {musicalConnections.collaborativePlaylists.map((playlist, index) => (
-                  <div key={index} className="collaborative-item">
-                    <div className="collaborative-cover">
-                      <img src={playlist.avatar} alt={playlist.name} />
-                    </div>
-                    <div className="collaborative-info">
-                      <p className="collaborative-name">{playlist.name}</p>
-                      <p className="collaborative-creator">{playlist.creator}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-        </div>
-
-        {/* Lado Direito */}
-        <div className="content-right">
-          {/* Meu DNA Musical */}
-          <section className="dna-section">
-            <h2>Meu DNA Musical</h2>
-            {musicalDNA.map((item, index) => (
-              <div key={index} className="genre-item">
-                <div className="genre-info">
-                  <span className="genre-name">{item.genre}</span>
-                  <span className="genre-percentage">{item.percentage}%</span>
-                </div>
-                <div className="genre-bar">
-                  <div
-                    className="genre-progress"
-                    style={{ width: `${item.percentage}%`, backgroundColor: item.color }}
-                  ></div>
-                </div>
-              </div>
-            ))}
-          </section>
-
-          {/* Conquistas */}
-          <section className="achievements-section">
-            <h2>Conquistas</h2>
-            <div className="achievements-grid">
-              {achievements.map((achievement) => (
-                <div
-                  key={achievement.id}
-                  className={`achievement-item ${achievement.unlocked ? "unlocked" : "locked"}`}
-                >
-                  <div className="achievement-icon">{achievement.icon}</div>
-                  <div className="achievement-info">
-                    <p className="achievement-name">{achievement.name}</p>
-                    <p className="achievement-description">{achievement.description}</p>
+          <section className="card">
+            <h3>Conexões Musicais</h3>
+            <div className="friends-list">
+              {[
+                { name: "Maria Silva", avatar: placeholderAvatar, info: "2 amigos em comum" },
+                { name: "João Santos", avatar: placeholderAvatar, info: "1 amigo em comum" },
+              ].map((f, i) => (
+                <div className="friend-row" key={i}>
+                  <img src={f.avatar} alt={f.name} />
+                  <div>
+                    <div className="friend-name">{f.name}</div>
+                    <div className="friend-info">{f.info}</div>
                   </div>
                 </div>
               ))}
             </div>
           </section>
 
-          {/* Configurações de Privacidade */}
-          <section className="privacy-section">
-            <h2>Configurações de Privacidade</h2>
-            <div className="privacy-settings">
-              {Object.entries(privacySettings).map(([key, value]) => {
-                const titleMap = {
-                  perfilPublico: "Perfil Público",
-                  atividadeVisivel: "Atividade Visível",
-                  playlistsPublicas: "Playlists Públicas",
-                };
-                const descriptionMap = {
-                  perfilPublico: "Permitir que outros vejam seu perfil",
-                  atividadeVisivel: "Mostrar o que você está ouvindo",
-                  playlistsPublicas: "Permitir descoberta das suas playlists",
-                };
-                return (
-                  <div key={key} className="privacy-item">
-                    <div className="privacy-info">
-                      <p className="privacy-title">{titleMap[key]}</p>
-                      <p className="privacy-description">{descriptionMap[key]}</p>
+          <section className="card privacy-card">
+            <h3>Configurações de Privacidade</h3>
+            <div className="privacy-list">
+              {Object.entries(privacySettings).map(([key, value]) => (
+                <div className="privacy-row" key={key}>
+                  <div>
+                    <div className="privacy-title">
+                      {key === "perfilPublico" ? "Perfil Público" : key === "atividadeVisivel" ? "Atividade Visível" : "Playlists Públicas"}
                     </div>
-                    <label className="toggle-switch">
-                      <input
-                        type="checkbox"
-                        checked={value}
-                        onChange={() => handlePrivacyToggle(key)}
-                      />
-                      <span className="toggle-slider"></span>
-                    </label>
+                    <div className="privacy-desc">
+                      {key === "perfilPublico" ? "Permitir que outros vejam seu perfil" : key === "atividadeVisivel" ? "Mostrar o que você está ouvindo" : "Permitir descoberta das suas playlists"}
+                    </div>
                   </div>
-                );
-              })}
+                  <label className="switch">
+                    <input type="checkbox" checked={value} onChange={() => handlePrivacyToggle(key)} />
+                    <span className="slider"></span>
+                  </label>
+                </div>
+              ))}
             </div>
           </section>
-        </div>
+        </aside>
       </div>
     </div>
   );
-};
-
-export default Profile;
+}
