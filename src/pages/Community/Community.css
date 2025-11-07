@@ -166,11 +166,12 @@
 }
 
 .communities-container .join-btn {
-  padding: 0.5rem;
-  background: #2563eb;
+  width: 100%;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(350deg, #7c58ff, #170099);
   color: white;
   border: none;
-  border-radius: 0.5rem;
+  border-radius: 9999px;
   font-size: 0.8125rem;
   font-weight: 600;
   cursor: pointer;
@@ -178,7 +179,7 @@
 }
 
 .communities-container .join-btn:hover {
-  background: #1d4ed8;
+  background: #9151ff;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
 }
@@ -197,6 +198,15 @@
 .communities-container .btn-challenge {
   margin-top: 1rem;
   width: 100%;
+}
+
+.category-card-description{
+  color: #9ca3af;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  line-height: 1.4;
+  text-align: left;
+  margin-bottom: 0.25rem;
 }
 
 /* ===== SECTIONS ===== */
@@ -531,6 +541,16 @@
   border-bottom: 1px solid rgba(55, 65, 81, 0.5);
 }
 
+.communities-container .discover-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.communities-container .discover-text {
+  flex: 1;
+}
+
 .communities-container .trending-list {
   display: flex;
   flex-direction: column;
@@ -680,8 +700,14 @@
 }
 
 .communities-container .discover-icon {
-  font-size: 2rem;
-  background:linear-gradient(200deg, #003283, #9151ff);;
+font-size: 2.5rem;
+background: linear-gradient(200deg, #003283, #9151ff);
+width: 4rem;
+height: 4rem;
+display: flex;
+align-items: center;
+justify-content: center;
+border-radius: 0.5rem;
 }
 
 /* ===== GRADIENTS AND BACKGROUNDS ===== */
