@@ -1,19 +1,18 @@
-// src/pages/Profile/index.jsx
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import "./Profile.css";
+import { useEffect, useState } from "react"
+import { Link } from "react-router-dom"
+import "./Profile.css"
 
-import placeholderAvatar from "../../assets/users.jpg";
-import placeholderBanner from "../../assets/musica_ocean.jpeg";
+import placeholderAvatar from "../../assets/users.jpg"
+import placeholderBanner from "../../assets/banner.jpg"
 
 export default function Profile() {
   const [privacySettings, setPrivacySettings] = useState({
     perfilPublico: true,
     atividadeVisivel: true,
     playlistsPublicas: false,
-  });
+  })
 
   const [userData, setUserData] = useState({
     name: "Usuário",
@@ -23,39 +22,61 @@ export default function Profile() {
     bio: "Adicione uma bio personalizada no seu perfil ✨",
     avatar: "",
     banner: "",
+    bannerUpdatedAt: 0,
     stats: { playlists: 0, horasOuvidas: 0, seguidores: 0 },
-  });
+  })
 
-  // helper: chave de storage por usuário
+  const [isLoadingBanner, setIsLoadingBanner] = useState(false)
+
+  // Helper: chave de storage por usuário
   const getProfileKey = () => {
-    const googleUserRaw = localStorage.getItem("googleUser");
+    const googleUserRaw = localStorage.getItem("googleUser")
     if (googleUserRaw) {
       try {
-        const googleUser = JSON.parse(googleUserRaw);
-        if (googleUser?.email) return `profile_${googleUser.email}`;
+        const googleUser = JSON.parse(googleUserRaw)
+        if (googleUser?.email) return `profile_${googleUser.email}`
       } catch {}
     }
-    return "userProfile";
-  };
+    return "userProfile"
+  }
 
-  // load profile at mount
+  // Comprime imagem para evitar limite de localStorage
+  const compressImage = async (dataUrl) => {
+    return new Promise((resolve) => {
+      const img = new Image()
+      img.onload = () => {
+        const canvas = document.createElement("canvas")
+        const ctx = canvas.getContext("2d")
+        canvas.width = img.width
+        canvas.height = img.height
+        ctx.drawImage(img, 0, 0)
+        const compressed = canvas.toDataURL("image/webp", 0.75)
+        resolve(compressed)
+      }
+      img.onerror = () => resolve(dataUrl)
+      img.src = dataUrl
+    })
+  }
+
+  // Load profile at mount
   useEffect(() => {
-    const key = getProfileKey();
-    const saved = localStorage.getItem(key);
+    const key = getProfileKey()
+    const saved = localStorage.getItem(key)
+
     if (saved) {
       try {
-        setUserData(JSON.parse(saved));
-      } catch {
-        // ignore parse error
+        const parsed = JSON.parse(saved)
+        setUserData(parsed)
+        return
+      } catch (err) {
+        console.error("[v0] Erro ao parsear profile salvo:", err)
       }
-      return;
     }
 
-    // if googleUser exists but no saved profile, create default from googleUser
-    const googleUserRaw = localStorage.getItem("googleUser");
+    const googleUserRaw = localStorage.getItem("googleUser")
     if (googleUserRaw) {
       try {
-        const googleUser = JSON.parse(googleUserRaw);
+        const googleUser = JSON.parse(googleUserRaw)
         const newProfile = {
           name: googleUser.name || "Usuário",
           username: `@${(googleUser.email || "user").split("@")[0]}`,
@@ -64,92 +85,149 @@ export default function Profile() {
           bio: "Olá, este é meu perfil 🎧",
           avatar: googleUser.photoURL || "",
           banner: "",
+          bannerUpdatedAt: 0,
           stats: { playlists: 12, horasOuvidas: 42, seguidores: 156 },
-        };
-        setUserData(newProfile);
-        localStorage.setItem(key, JSON.stringify(newProfile));
-      } catch {}
-    } else {
-      // fallback: keep default userData or existing userProfile (already handled above)
+        }
+        setUserData(newProfile)
+        localStorage.setItem(key, JSON.stringify(newProfile))
+      } catch (err) {
+        console.error("[v0] Erro ao carregar Google User:", err)
+      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [])
 
-  // listen storage (so changes from EditProfile or other tabs update)
+  // Listen storage updates
   useEffect(() => {
     const onStorage = (e) => {
-      if (!e.key) return;
-      const key = getProfileKey();
-      if (e.key === key) {
-        const updated = localStorage.getItem(key);
-        if (updated) {
-          try {
-            setUserData(JSON.parse(updated));
-          } catch {}
+      const key = getProfileKey()
+      if (e.key === key && e.newValue) {
+        try {
+          const updated = JSON.parse(e.newValue)
+          setUserData(updated)
+        } catch (err) {
+          console.error("[v0] Erro ao sincronizar storage:", err)
         }
       }
-    };
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
-  }, []);
-
-  // persist helper (also dispatch storage event for same-tab updates)
-  const persistProfile = (updatedProfile) => {
-    setUserData(updatedProfile);
-    const key = updatedProfile.email ? `profile_${updatedProfile.email}` : getProfileKey();
-    localStorage.setItem(key, JSON.stringify(updatedProfile));
-    // try dispatch so same-tab components that listen to storage see change
-    try {
-      window.dispatchEvent(
-        new StorageEvent("storage", { key, newValue: JSON.stringify(updatedProfile) })
-      );
-    } catch {
-      // some browsers disallow creating StorageEvent; not critical
     }
-  };
 
-  // avatar upload (Profile)
+    window.addEventListener("storage", onStorage)
+    return () => window.removeEventListener("storage", onStorage)
+  }, [])
+
+  // Persist helper com tratamento robusto
+  const persistProfile = (updatedProfile) => {
+    setUserData(updatedProfile)
+    const key = updatedProfile.email ? `profile_${updatedProfile.email}` : getProfileKey()
+
+    try {
+      localStorage.setItem(key, JSON.stringify(updatedProfile))
+      window.dispatchEvent(
+        new StorageEvent("storage", {
+          key,
+          newValue: JSON.stringify(updatedProfile),
+        }),
+      )
+    } catch (err) {
+      if (err.name === "QuotaExceededError") {
+        console.error("[v0] localStorage cheio, tentando limpar cache...")
+        try {
+          // Remove imagens antigas para liberar espaço
+          const keys = Object.keys(localStorage)
+          keys.forEach((k) => {
+            if (k.startsWith("profile_") && k !== key) {
+              const stored = JSON.parse(localStorage.getItem(k) || "{}")
+              stored.banner = ""
+              stored.avatar = ""
+              localStorage.setItem(k, JSON.stringify(stored))
+            }
+          })
+          localStorage.setItem(key, JSON.stringify(updatedProfile))
+        } catch (e) {
+          console.error("[v0] Erro ao limpar cache:", e)
+        }
+      }
+    }
+  }
+
   const handleAvatarChange = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const imageUrl = reader.result; // dataURL
-      const updated = { ...userData, avatar: imageUrl };
-      persistProfile(updated);
-    };
-    reader.readAsDataURL(file);
-  };
+    const file = e.target.files?.[0]
+    if (!file) return
 
-  // banner upload (Profile)
+    const reader = new FileReader()
+    reader.onload = async () => {
+      try {
+        const compressed = await compressImage(reader.result)
+        persistProfile({ ...userData, avatar: compressed })
+      } catch (err) {
+        console.error("[v0] Erro ao processar avatar:", err)
+        persistProfile({ ...userData, avatar: reader.result })
+      }
+    }
+    reader.onerror = () => console.error("[v0] Erro ao ler arquivo")
+    reader.readAsDataURL(file)
+  }
+
   const handleBannerChange = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const imageUrl = reader.result;
-      const updated = { ...userData, banner: imageUrl };
-      persistProfile(updated);
-    };
-    reader.readAsDataURL(file);
-  };
+    const file = e.target.files?.[0]
+    if (!file) return
 
-  const handlePrivacyToggle = (key) =>
-    setPrivacySettings((prev) => ({ ...prev, [key]: !prev[key] }));
+    setIsLoadingBanner(true)
+    const reader = new FileReader()
 
-  const getInitial = (name) => (name ? name.charAt(0).toUpperCase() : "?");
-  const stats = userData.stats || { playlists: 0, horasOuvidas: 0, seguidores: 0 };
+    reader.onload = async () => {
+      try {
+        const compressed = await compressImage(reader.result)
+        persistProfile({
+          ...userData,
+          banner: compressed,
+          bannerUpdatedAt: Date.now(),
+        })
+      } catch (err) {
+        console.error("[v0] Erro ao processar banner:", err)
+        persistProfile({
+          ...userData,
+          banner: reader.result,
+          bannerUpdatedAt: Date.now(),
+        })
+      } finally {
+        setIsLoadingBanner(false)
+      }
+    }
+
+    reader.onerror = () => {
+      console.error("[v0] Erro ao ler arquivo de banner")
+      setIsLoadingBanner(false)
+    }
+
+    reader.readAsDataURL(file)
+  }
+
+  const handlePrivacyToggle = (key) => {
+    setPrivacySettings((prev) => ({ ...prev, [key]: !prev[key] }))
+  }
+
+  const getInitial = (name) => (name ? name.charAt(0).toUpperCase() : "?")
+  const stats = userData.stats || { playlists: 0, horasOuvidas: 0, seguidores: 0 }
 
   return (
     <div className="profile-page">
       {/* Banner */}
       <div
-        className="profile-banner"
+        className={`profile-banner ${isLoadingBanner ? "loading" : ""}`}
         style={{
-          backgroundImage: `url(${userData.banner || placeholderBanner})`,
+          backgroundImage: userData.banner
+            ? `url(${userData.banner}?t=${userData.bannerUpdatedAt})`
+            : "linear-gradient(135deg, #9333ea, #a855f7, #7e22ce)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
         }}
       >
-        <label htmlFor="banner-upload" className="banner-edit-btn" title="Trocar banner">
+        <label
+          htmlFor="banner-upload"
+          className="banner-edit-btn"
+          title="Trocar banner"
+          style={{ pointerEvents: isLoadingBanner ? "none" : "auto" }}
+        >
           <svg width="16" height="16" viewBox="0 0 24 24">
             <path
               fill="white"
@@ -157,26 +235,41 @@ export default function Profile() {
             />
           </svg>
         </label>
-        <input id="banner-upload" type="file" accept="image/*" onChange={handleBannerChange} style={{ display: "none" }} />
+        <input
+          id="banner-upload"
+          type="file"
+          accept="image/*"
+          onChange={handleBannerChange}
+          style={{ display: "none" }}
+          disabled={isLoadingBanner}
+        />
 
         <div className="profile-banner-overlay">
           <div className="profile-header-inner">
-            {/* Avatar + info */}
             <div className="profile-left">
               <div className="avatar-block">
                 <label htmlFor="avatar-upload" className="avatar-label" title="Trocar foto">
                   {userData.avatar ? (
-                    <img src={userData.avatar} alt="avatar" className="avatar-img" />
+                    <img src={userData.avatar || "/placeholder.svg"} alt="avatar" className="avatar-img" />
                   ) : (
                     <div className="avatar-initial">{getInitial(userData.name)}</div>
                   )}
                   <div className="avatar-edit-icon">
                     <svg width="14" height="14" viewBox="0 0 24 24">
-                      <path fill="white" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM21.41 6.34a1.25 1.25 0 0 0 0-1.77l-2-2a1.25 1.25 0 0 0-1.77 0l-1.83 1.83 3.75 3.75 1.85-1.81z" />
+                      <path
+                        fill="white"
+                        d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM21.41 6.34a1.25 1.25 0 0 0 0-1.77l-2-2a1.25 1.25 0 0 0-1.77 0l-1.83 1.83 3.75 3.75 1.85-1.81z"
+                      />
                     </svg>
                   </div>
                 </label>
-                <input id="avatar-upload" type="file" accept="image/*" onChange={handleAvatarChange} style={{ display: "none" }} />
+                <input
+                  id="avatar-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarChange}
+                  style={{ display: "none" }}
+                />
               </div>
 
               <div className="profile-meta">
@@ -207,10 +300,19 @@ export default function Profile() {
               </div>
             </div>
 
-            {/* Actions */}
             <div className="profile-actions-area">
-              <Link to="/editprofile" className="btn btn-edit">Editar Perfil</Link>
-              <button className="btn btn-share" onClick={() => { navigator.clipboard?.writeText(window.location.href); alert("Link copiado!"); }}>Compartilhar</button>
+              <Link to="/editprofile" className="btn btn-edit">
+                Editar Perfil
+              </Link>
+              <button
+                className="btn btn-share"
+                onClick={() => {
+                  navigator.clipboard?.writeText(window.location.href)
+                  alert("Link copiado!")
+                }}
+              >
+                Compartilhar
+              </button>
             </div>
           </div>
         </div>
@@ -219,17 +321,36 @@ export default function Profile() {
       {/* Main content */}
       <div className="container grid">
         <div className="left-col">
-          {/* Activity */}
           <section className="card">
             <div className="card-header">
               <h3>Atividade Recente</h3>
-              <a className="link-primary" href="#">Ver Tudo</a>
+              <a className="link-primary" href="#">
+                Ver Tudo
+              </a>
             </div>
             <div className="activity-list">
               {[
-                { id: 1, title: "Criou uma nova playlist", subtitle: "Domingo Chill", time: "há 2 horas", icon: "🎵" },
-                { id: 2, title: "Curtiu uma música", subtitle: "Evidências — Chitãozinho & Xororó", time: "há 5 horas", icon: "❤️" },
-                { id: 3, title: "Seguiu um novo artista", subtitle: "Luísa Sonza", time: "ontem", icon: "👤" },
+                {
+                  id: 1,
+                  title: "Criou uma nova playlist",
+                  subtitle: "Domingo Chill",
+                  time: "há 2 horas",
+                  icon: "🎵",
+                },
+                {
+                  id: 2,
+                  title: "Curtiu uma música",
+                  subtitle: "Evidências — Chitãozinho & Xororó",
+                  time: "há 5 horas",
+                  icon: "❤️",
+                },
+                {
+                  id: 3,
+                  title: "Seguiu um novo artista",
+                  subtitle: "Luísa Sonza",
+                  time: "ontem",
+                  icon: "👤",
+                },
               ].map((a) => (
                 <div key={a.id} className="activity-item">
                   <div className="activity-icon">{a.icon}</div>
@@ -243,7 +364,6 @@ export default function Profile() {
             </div>
           </section>
 
-          {/* Playlists */}
           <section className="card">
             <div className="card-header">
               <h3>Minhas Playlists</h3>
@@ -266,7 +386,6 @@ export default function Profile() {
           </section>
         </div>
 
-        {/* Right column */}
         <aside className="right-col">
           <section className="card dna-card">
             <h3>Meu DNA Musical</h3>
@@ -298,7 +417,7 @@ export default function Profile() {
                 { name: "João Santos", avatar: placeholderAvatar, info: "1 amigo em comum" },
               ].map((f, i) => (
                 <div className="friend-row" key={i}>
-                  <img src={f.avatar} alt={f.name} />
+                  <img src={f.avatar || "/placeholder.svg"} alt={f.name} />
                   <div>
                     <div className="friend-name">{f.name}</div>
                     <div className="friend-info">{f.info}</div>
@@ -315,10 +434,18 @@ export default function Profile() {
                 <div className="privacy-row" key={key}>
                   <div>
                     <div className="privacy-title">
-                      {key === "perfilPublico" ? "Perfil Público" : key === "atividadeVisivel" ? "Atividade Visível" : "Playlists Públicas"}
+                      {key === "perfilPublico"
+                        ? "Perfil Público"
+                        : key === "atividadeVisivel"
+                          ? "Atividade Visível"
+                          : "Playlists Públicas"}
                     </div>
                     <div className="privacy-desc">
-                      {key === "perfilPublico" ? "Permitir que outros vejam seu perfil" : key === "atividadeVisivel" ? "Mostrar o que você está ouvindo" : "Permitir descoberta das suas playlists"}
+                      {key === "perfilPublico"
+                        ? "Permitir que outros vejam seu perfil"
+                        : key === "atividadeVisivel"
+                          ? "Mostrar o que você está ouvindo"
+                          : "Permitir descoberta das suas playlists"}
                     </div>
                   </div>
                   <label className="switch">
@@ -332,5 +459,5 @@ export default function Profile() {
         </aside>
       </div>
     </div>
-  );
+  )
 }
