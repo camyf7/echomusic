@@ -254,10 +254,12 @@ const Communities = () => {
             </h3>
             {discoverCommunities.map((dc, i) => (
               <div key={i} className="discover-item category-card">
-                <div className="discover-icon">{dc.icon}</div>
-                <div>
-                  <div className="category-card-title">{dc.name}</div>
-                  <div className="category-card-description">{dc.description}</div>
+                <div className="discover-header">
+                  <div className="discover-icon">{dc.icon}</div>
+                  <div className="discover-text">
+                    <div className="category-card-title">{dc.name}</div>
+                    <div className="category-card-description">{dc.description}</div>
+                  </div>
                 </div>
                 <button className="join-btn category-enter-btn">Entrar</button>
               </div>
