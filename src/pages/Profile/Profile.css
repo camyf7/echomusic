@@ -112,9 +112,11 @@
   cursor: pointer;
   border-radius: 50%;
   overflow: hidden;
+  cursor: pointer;
   border: 4px solid rgba(255, 255, 255, 0.3);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   background: rgba(0, 0, 0, 0.2);
+  z-index: 5;
 }
 
 .avatar-label:hover {
@@ -128,6 +130,8 @@
   height: 100%;
   object-fit: cover;
   transition: transform 0.3s ease;
+  z-index: 1;
+  position: relative;
 }
 
 .avatar-label:hover .avatar-img {
@@ -160,6 +164,7 @@
   border: 3px solid white;
   opacity: 0;
   transition: opacity 0.3s ease;
+  z-index: 10;
 }
 
 .avatar-label:hover .avatar-edit-icon {
@@ -730,4 +735,8 @@ input:checked + .slider:before {
   .playlists-grid {
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   }
+}
+.avatar-block {
+  position: relative;
+  z-index: 0;
 }
