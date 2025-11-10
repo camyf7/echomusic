@@ -247,30 +247,25 @@ export default function Profile() {
         <div className="profile-banner-overlay">
           <div className="profile-header-inner">
             <div className="profile-left">
-              <div className="avatar-block">
-                <label htmlFor="avatar-upload" className="avatar-label" title="Trocar foto">
-                  {userData.avatar ? (
-                    <img src={userData.avatar || "/placeholder.svg"} alt="avatar" className="avatar-img" />
-                  ) : (
-                    <div className="avatar-initial">{getInitial(userData.name)}</div>
-                  )}
-                  <div className="avatar-edit-icon">
-                    <svg width="14" height="14" viewBox="0 0 24 24">
-                      <path
-                        fill="white"
-                        d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM21.41 6.34a1.25 1.25 0 0 0 0-1.77l-2-2a1.25 1.25 0 0 0-1.77 0l-1.83 1.83 3.75 3.75 1.85-1.81z"
-                      />
-                    </svg>
-                  </div>
-                </label>
-                <input
-                  id="avatar-upload"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleAvatarChange}
-                  style={{ display: "none" }}
-                />
-              </div>
+            <div className="avatar-block">
+  <label htmlFor="avatar-upload" className="avatar-label" title="Trocar foto">
+    {userData.avatar ? (
+      <img src={userData.avatar} alt="Avatar" className="avatar-img" />
+    ) : (
+      <div className="avatar-initial">{getInitial(userData.name)}</div>
+    )}
+    <div className="avatar-edit-icon">
+      <svg width="16" height="16" viewBox="0 0 24 24">
+        <path
+          fill="white"
+          d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM21.41 6.34a1.25 1.25 0 0 0 0-1.77l-2-2a1.25 1.25 0 0 0-1.77 0l-1.83 1.83 3.75 3.75 1.85-1.81z"
+        />
+      </svg>
+    </div>
+  </label>
+  <input id="avatar-upload" type="file" accept="image/*" style={{ display: "none" }} />
+</div>
+ 
 
               <div className="profile-meta">
                 <h1 className="profile-name">{userData.name}</h1>
