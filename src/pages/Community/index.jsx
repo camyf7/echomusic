@@ -13,22 +13,16 @@ import {
   LuUsers,
   LuCalendar,
   LuChevronRight,
+  LuSend,
+  LuTrash2,
 } from "react-icons/lu";
 
 const Communities = () => {
   const [likedPosts, setLikedPosts] = useState({});
   const [playing, setPlaying] = useState(null);
   const [activeTab, setActiveTab] = useState("recentes");
-
-  const toggleLike = (id) => {
-    setLikedPosts((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
-
-  const togglePlay = (id) => {
-    setPlaying(playing === id ? null : id);
-  };
-
-  const posts = [
+  const [newComment, setNewComment] = useState({}); // {postId: commentText}
+  const [posts, setPosts] = useState([
     {
       id: 1,
       user: "João Santos",
@@ -40,6 +34,9 @@ const Communities = () => {
       cover: "🔥",
       likes: 23,
       comments: 8,
+      commentsList: [
+        { id: 1, user: "Ana Oliveira", text: "Essa música é incrível! Me transporta para outro mundo.", time: "30min" },
+      ],
     },
     {
       id: 2,
@@ -48,11 +45,11 @@ const Communities = () => {
       time: "2h",
       type: "text",
       content: "Qual foi o último show que vocês foram que mudou completamente sua perspectiva musical?",
-      replies: [
-        { user: "Lucas Ferreira", text: "O show do Tash Sultana no Rock in Rio 2019. Nunca tinha ouvido nada igual!", time: "1h" },
-      ],
       likes: 45,
       comments: 12,
+      commentsList: [
+        { id: 3, user: "Lucas Ferreira", text: "O show do Tash Sultana no Rock in Rio 2019. Nunca tinha ouvido nada igual!", time: "1h" },
+      ],
     },
     {
       id: 3,
@@ -64,8 +61,69 @@ const Communities = () => {
       description: "Vamos nos reunir para uma roda de samba especial com participação do sambista João de Volta! Tragam seus instrumentos e vozes para uma noite inesquecível.",
       date: "Quinta, 29 Ago",
       participants: 47,
+      likes: 15,
+      comments: 5,
+      commentsList: [
+        { id: 5, user: "Ricardo Lima", text: "Mal posso esperar! Vou levar meu cavaquinho.", time: "2h" },
+      ],
     },
-  ];
+  ]);
+
+  const toggleLike = (id) => {
+    setLikedPosts((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const togglePlay = (id) => {
+    setPlaying(playing === id ? null : id);
+  };
+
+  const handleCommentChange = (postId, text) => {
+    setNewComment((prev) => ({ ...prev, [postId]: text }));
+  };
+
+  const submitComment = (postId) => {
+    const text = newComment[postId]?.trim();
+    if (!text) return;
+
+    setPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post.id === postId
+          ? {
+              ...post,
+              comments: post.comments + 1,
+              commentsList: [
+                ...post.commentsList,
+                {
+                  id: Date.now(),
+                  user: "Você", // Simulate current user
+                  text,
+                  time: "Agora",
+                },
+              ],
+            }
+          : post
+      )
+    );
+    setNewComment((prev) => ({ ...prev, [postId]: "" }));
+  };
+
+  const deleteComment = (postId, commentId) => {
+    setPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post.id === postId
+          ? {
+              ...post,
+              comments: Math.max(0, post.comments - 1),
+              commentsList: post.commentsList.filter((c) => c.id !== commentId),
+            }
+          : post
+      )
+    );
+  };
+
+  const filteredPosts = posts.filter((post) =>
+    activeTab === "populares" ? post.likes > 30 : true
+  );
 
   const communities = [
     { id: 1, name: "Rock Brasileiro", icon: "🎸", members: "12.5K membros" },
@@ -80,29 +138,27 @@ const Communities = () => {
 
   const trending = ["#NovoAlbumCaetano", "#RockInRio2025", "#IndieDescoberta", "#SambaModerno"];
 
-  
-
   return (
-    <div className="communities-container">
+    <div className="communitiesPageContainer">
       {/* Header */}
-      <div className="communities-header">
-        <div className="header-background">
-          <div className="bg-blob bg-blob1"></div>
-          <div className="bg-blob bg-blob2"></div>
-          <div className="bg-blob bg-blob3"></div>
+      <div className="communitiesHeader">
+        <div className="headerBackground">
+          <div className="bgBlob bgBlob1"></div>
+          <div className="bgBlob bgBlob2"></div>
+          <div className="bgBlob bgBlob3"></div>
         </div>
-        <div className="header-content">
-          <div className="header-info">
-            <h1 className="header-title gradient-text">Suas Comunidades Musicais</h1>
-            <p className="header-description">
+        <div className="headerContent">
+          <div className="headerInfo">
+            <h1 className="headerTitle gradientText">Suas Comunidades Musicais</h1>
+            <p className="headerDescription">
               Conecte-se com pessoas apaixonadas pelos mesmos sons que você. Descubra, discuta e compartilhe músicas em comunidades vibrantes.
             </p>
           </div>
-          <div className="header-actions cta-buttons">
-            <button className="btn btn-primary">
+          <div className="headerActions ctaButtons">
+            <button className="btn btnPrimary">
               <LuPlus size={18} /> Criar Nova Comunidade
             </button>
-            <button className="btn btn-secondary">
+            <button className="btn btnSecondary">
               <LuSearch size={18} /> Explorar Comunidades
             </button>
           </div>
@@ -110,53 +166,52 @@ const Communities = () => {
       </div>
 
       {/* Conteúdo Principal */}
-      <div className="communities-content section-container">
+      <div className="communitiesContent">
         {/* Lado Esquerdo - Feed */}
-        <div className="content-left">
-          <section className="feed-section">
-            <div className="section-header">
-              <h2 className="section-title-left">
+        <div className="contentLeft">
+          <section className="feedSection">
+            <div className="sectionHeader">
+              <h2 className="sectionTitleLeft">
                 <LuMusic size={24} /> Feed das Comunidades
               </h2>
-              <div className="feed-tabs category-tabs">
+              <div className="feedTabs categoryTabs">
                 <button
-                  className={`category-tab ${activeTab === "recentes" ? "category-tab-active" : ""}`}
+                  className={`categoryTab ${activeTab === "recentes" ? "categoryTabActive" : ""}`}
                   onClick={() => setActiveTab("recentes")}
                 >
                   Recentes
                 </button>
                 <button
-                  className={`category-tab ${activeTab === "populares" ? "category-tab-active" : ""}`}
+                  className={`categoryTab ${activeTab === "populares" ? "categoryTabActive" : ""}`}
                   onClick={() => setActiveTab("populares")}
                 >
                   Populares
                 </button>
               </div>
             </div>
-
-            <div className="posts featured-grid">
-              {posts.map((post) => (
-                <div key={post.id} className="post-card featured-card">
-                  <div className="card-gradient gradient-blue-purple"></div>
-                  <div className="post-header card-header">
-                    <div className="user-info host-info">
-                      <span className="avatar host-avatar">{post.avatar}</span>
-                      <div className="host-details">
-                        <strong className="host-name">{post.user}</strong>
-                        <span className="time host-label"> · {post.time}</span>
+            <div className="posts featuredGrid">
+              {filteredPosts.map((post) => (
+                <div key={post.id} className="postCard featuredCard">
+                  <div className="cardGradient gradientBluePurple"></div>
+                  <div className="postHeader cardHeader">
+                    <div className="userInfo hostInfo">
+                      <span className="avatar hostAvatar">{post.avatar}</span>
+                      <div className="hostDetails">
+                        <strong className="hostName">{post.user}</strong>
+                        <span className="time hostLabel"> · {post.time}</span>
                       </div>
                     </div>
                   </div>
 
                   {post.type === "music" && (
-                    <div className="music-player current-track">
-                      <div className="track-info">
-                        <div className="music-cover track-icon">{post.cover}</div>
-                        <div className="music-info track-details">
-                          <h4 className="track-song">{post.title}</h4>
-                          <p className="track-artist">{post.artist}</p>
+                    <div className="musicPlayer currentTrack">
+                      <div className="trackInfo">
+                        <div className="musicCover trackIcon">{post.cover}</div>
+                        <div className="musicInfo trackDetails">
+                          <h4 className="trackSong">{post.title}</h4>
+                          <p className="trackArtist">{post.artist}</p>
                         </div>
-                        <button className={`play-btn`} onClick={() => togglePlay(post.id)}>
+                        <button className="playBtn" onClick={() => togglePlay(post.id)}>
                           <LuPlay size={20} fill={playing === post.id ? "white" : "none"} />
                         </button>
                       </div>
@@ -164,22 +219,22 @@ const Communities = () => {
                   )}
 
                   {post.type === "text" && (
-                    <div className="post-content card-description">
+                    <div className="postContent cardDescription">
                       <p>{post.content}</p>
-                      {post.replies &&
-                        post.replies.map((r, i) => (
-                          <div key={i} className="reply">
-                            <strong>{r.user}</strong>: {r.text}
-                          </div>
-                        ))}
+                      {post.commentsList.slice(0, 1).map((comment) => (
+                        <div key={comment.id} className="reply commentItem">
+                          <strong className="commentUser">{comment.user}</strong>: {comment.text}
+                          <span className="commentTime"> · {comment.time}</span>
+                        </div>
+                      ))}
                     </div>
                   )}
 
                   {post.type === "event" && (
-                    <div className="event-card">
-                      <h4 className="card-title">{post.title}</h4>
-                      <p className="card-description">{post.description}</p>
-                      <div className="event-meta card-footer">
+                    <div className="eventCard">
+                      <h4 className="cardTitle">{post.title}</h4>
+                      <p className="cardDescription">{post.description}</p>
+                      <div className="eventMeta cardFooter">
                         <span>
                           <LuCalendar size={14} /> {post.date}
                         </span>
@@ -190,106 +245,142 @@ const Communities = () => {
                     </div>
                   )}
 
-                  <div className="post-actions card-footer">
-                    <button
-                      className={`action-btn heart-icon ${likedPosts[post.id] ? "heart-hovered" : ""}`}
-                      onClick={() => toggleLike(post.id)}
-                    >
-                      <LuHeart size={18} fill={likedPosts[post.id] ? "#ff4444" : "none"} />
-                      <span>{(Number(post.likes) || 0) + (likedPosts[post.id] ? 1 : 0)}</span>
+                  {/* Comments Input - Hidden in prototype, but functional */}
+                  <div className="commentsSection">
+                    <div className="commentsList">
+                      {post.commentsList.slice(1).map((comment) => (
+                        <div key={comment.id} className="commentItem">
+                          <div className="commentHeader">
+                            <strong className="commentUser">{comment.user}</strong>
+                            <span className="commentTime"> · {comment.time}</span>
+                            {comment.user === "Você" && (
+                              <button
+                                className="deleteCommentBtn"
+                                onClick={() => deleteComment(post.id, comment.id)}
+                              >
+                                <LuTrash2 size={14} />
+                              </button>
+                            )}
+                          </div>
+                          <p className="commentText">{comment.text}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="newCommentInput">
+                      <input
+                        type="text"
+                        placeholder="Adicione um comentário..."
+                        value={newComment[post.id] || ""}
+                        onChange={(e) => handleCommentChange(post.id, e.target.value)}
+                        onKeyPress={(e) => e.key === "Enter" && submitComment(post.id)}
+                        className="commentInput"
+                      />
+                      <button className="submitCommentBtn" onClick={() => submitComment(post.id)}>
+                        <LuSend size={16} />
+                      </button>
+                    </div>
+                  </div>
 
-                    </button>
-                    <button className="action-btn">
-                      <LuMessageCircle size={18} />
-                      <span>{post.comments}</span>
-                    </button>
-                    <button className="action-btn">
-                      <LuShare2 size={18} />
-                    </button>
+                  <div className="postActions cardFooter">
+                    <div className="actionsLeft">
+                      <button
+                        className={`actionBtn heartIcon ${likedPosts[post.id] ? "heartHovered" : ""}`}
+                        onClick={() => toggleLike(post.id)}
+                      >
+                        <LuHeart size={18} fill={likedPosts[post.id] ? "#ff4444" : "none"} />
+                        <span>{(Number(post.likes) || 0) + (likedPosts[post.id] ? 1 : 0)}</span>
+                      </button>
+                      <button className="actionBtn">
+                        <LuMessageCircle size={18} />
+                        <span>{post.comments}</span>
+                      </button>
+                      <button className="actionBtn">
+                        <LuShare2 size={18} />
+                      </button>
+                    </div>
                     {post.type === "event" && (
-                      <>
-                        <button className="btn-participate enter-btn gradient-blue-purple">Participar</button>
-                        <button className="btn-listen enter-btn gradient-purple-pink">
+                      <div className="eventButtons">
+                        <button className="btnParticipate enterBtn gradientBluePurple">Participar</button>
+                        <button className="btnListen enterBtn gradientPurplePink">
                           <LuMusic size={16} /> Escutar ao Vivo
                         </button>
-                      </>
+                      </div>
                     )}
                   </div>
                 </div>
               ))}
             </div>
-
-            <div className="load-more-container">
-              <button className="load-more load-more-btn">Carregar Mais Posts</button>
+            <div className="loadMoreContainer">
+              <button className="loadMore loadMoreBtn">Carregar Mais Posts</button>
             </div>
           </section>
         </div>
 
         {/* Lado Direito - Sidebar */}
-        <div className="content-right">
+        <div className="contentRight">
           {/* Minhas Comunidades */}
-          <section className="sidebar-section category-section">
-            <h3 className="section-title">
+          <section className="sidebarSection categorySection">
+            <h3 className="sectionTitle">
               <LuUsers size={20} /> Minhas Comunidades
             </h3>
-            <div className="category-grid">
+            <div className="categoryGrid">
               {communities.map((c) => (
-                <div key={c.id} className="community-item category-card">
-                  <span className="community-icon category-card-header">{c.icon}</span>
+                <div key={c.id} className="communityItem categoryCard">
+                  <span className="communityIcon categoryCardHeader">{c.icon}</span>
                   <div>
-                    <div className="community-name category-card-title">{c.name}</div>
-                    <div className="community-members category-card-description">{c.members}</div>
+                    <div className="communityName categoryCardTitle">{c.name}</div>
+                    <div className="communityMembers categoryCardDescription">{c.members}</div>
                   </div>
                   <LuChevronRight size={16} />
                 </div>
               ))}
             </div>
-            <button className="view-all view-all-btn">Ver Todas</button>
+            <button className="viewAll viewAllBtn">Ver Todas</button>
           </section>
 
           {/* Descubra Comunidades */}
-          <section className="sidebar-section">
-            <h3 className="section-title-discover">
+          <section className="sidebarSection discoverSection">
+            <h3 className="sectionTitleDiscover">
               <LuSearch size={20} /> Descubra Comunidades
             </h3>
             {discoverCommunities.map((dc, i) => (
-              <div key={i} className="discover-item category-card">
-                <div className="discover-header">
-                  <div className="discover-icon">{dc.icon}</div>
-                  <div className="discover-text">
-                    <div className="category-card-title">{dc.name}</div>
-                    <div className="category-card-description">{dc.description}</div>
+              <div key={i} className="discoverItem categoryCard">
+                <div className="discoverHeader">
+                  <div className="discoverIcon">{dc.icon}</div>
+                  <div className="discoverText">
+                    <div className="categoryCardTitle">{dc.name}</div>
+                    <div className="categoryCardDescription">{dc.description}</div>
                   </div>
                 </div>
-                <button className="join-btn category-enter-btn">Entrar</button>
+                <button className="joinBtn categoryEnterBtn">Entrar</button>
               </div>
             ))}
           </section>
 
           {/* Tópicos em Alta */}
-          <section className="sidebar-section">
-            <h3 className="section-title">
+          <section className="sidebarSection trendingSection">
+            <h3 className="sectionTitle">
               <LuTrendingUp size={20} /> Tópicos em Alta
             </h3>
-            <div className="trending-list">
+            <div className="trendingList">
               {trending.map((topic, i) => (
-                <div key={i} className="trending-item">
+                <div key={i} className="trendingItem">
                   <LuTrendingUp size={14} />
                   <span>{topic}</span>
-                  <span className="posts-count">{Math.floor(Math.random() * 1000) + 100} posts</span>
+                  <span className="postsCount">{Math.floor(Math.random() * 1000) + 100} posts</span>
                 </div>
               ))}
             </div>
           </section>
 
           {/* Desafio da Semana */}
-          <section className="challenge-section feature-card">
-            <div className="challenge-header">
+          <section className="challengeSection featureCard">
+            <div className="challengeHeader">
               <LuStar size={20} />
-              <h3 className="feature-title">Desafio da Semana</h3>
+              <h3 className="featureTitle">Desafio da Semana</h3>
             </div>
-            <p className="feature-description">Compartilhe uma música que representa seu estado emocional atual</p>
-            <button className="btn-challenge enter-btn gradient-cyan-blue">Participar</button>
+            <p className="featureDescription">Compartilhe uma música que representa seu estado emocional atual</p>
+            <button className="btnChallenge enterBtn gradientCyanBlue">Participar</button>
           </section>
         </div>
       </div>
