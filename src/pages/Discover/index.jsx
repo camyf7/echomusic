@@ -1,56 +1,54 @@
-import './Discover.css';
+import "./Discover.css";
 import React, { useState } from "react";
+import { usePlayer } from "../../contexts/PlayerContext"; // 👈 Import do contexto global
 import { HiLightBulb } from "react-icons/hi";
 import { IoMusicalNotesOutline } from "react-icons/io5";
-import { LuMoon } from "react-icons/lu";
-import { LuDumbbell } from "react-icons/lu";
+import { LuMoon, LuDumbbell, LuPiano } from "react-icons/lu";
 import { FcLike } from "react-icons/fc";
-import { FaComment } from "react-icons/fa";
-import { GiGuitar } from "react-icons/gi";
-import { IoMdMicrophone } from "react-icons/io";
-import { FaHeadphonesAlt } from "react-icons/fa";
-import { GiSoundWaves } from "react-icons/gi";
-import { LuPiano } from "react-icons/lu";
+import { FaComment, FaHeadphonesAlt, FaUserFriends } from "react-icons/fa";
+import { GiGuitar, GiSoundWaves } from "react-icons/gi";
 import { LiaGuitarSolid } from "react-icons/lia";
-import { FaUserFriends } from "react-icons/fa";
 import { FiPlus } from "react-icons/fi";
 import { IoMdPlay, IoMdPause } from "react-icons/io";
-import usuario1 from '../../assets/usuario_larissa.png';
-import usuario2 from '../../assets/usario_felipe.png';
-import usuario3 from '../../assets/usario_mariana.png';
-import musica1 from '../../assets/musica_starboy.png';
-import musica2 from '../../assets/musica_adventure.png';
-import musica3 from '../../assets/musica_miracle.png';
-import musica4 from '../../assets/musica_2much.png';
-import musica5 from '../../assets/musica_good.jpg';
-import musica6 from '../../assets/musica_heat.png';
-import musica7 from '../../assets/musica_levitating.png';
-import musica8 from '../../assets/musica_harrystyles.png';
-import musica9 from '../../assets/musica_die.png';
-import musica10 from '../../assets/musica_papoulas.png';
+
+// imagens
+import usuario1 from "../../assets/usuario_larissa.png";
+import usuario2 from "../../assets/usario_felipe.png";
+import usuario3 from "../../assets/usario_mariana.png";
+import musica1 from "../../assets/musica_starboy.png";
+import musica2 from "../../assets/musica_adventure.png";
+import musica3 from "../../assets/musica_miracle.png";
+import musica4 from "../../assets/musica_2much.png";
+import musica5 from "../../assets/musica_good.jpg";
+import musica6 from "../../assets/musica_heat.png";
+import musica7 from "../../assets/musica_levitating.png";
+import musica8 from "../../assets/musica_harrystyles.png";
+import musica9 from "../../assets/musica_die.png";
+import musica10 from "../../assets/musica_papoulas.png";
 
 export default function Discover() {
-  const [playingSongs, setPlayingSongs] = useState({});
   const [recommendedSongs, setRecommendedSongs] = useState([
-    { id: 1, img: musica5, title: 'Good 4 U', artist: 'Olivia Rodrigo', likes: 163, friends: 7 },
-    { id: 2, img: musica7, title: 'Levitating', artist: 'Dua Lipa', likes: 203, friends: 7 },
-    { id: 3, img: musica4, title: '2 Much', artist: 'Justin Bieber', likes: 504, friends: 10 },
-    { id: 4, img: musica6, title: 'Heat Waves', artist: 'Glass Animals', likes: 308, friends: 5 },
+    { id: 1, img: musica5, title: "Good 4 U", artist: "Olivia Rodrigo", likes: 163, friends: 7 },
+    { id: 2, img: musica7, title: "Levitating", artist: "Dua Lipa", likes: 203, friends: 7 },
+    { id: 3, img: musica4, title: "2 Much", artist: "Justin Bieber", likes: 504, friends: 10 },
+    { id: 4, img: musica6, title: "Heat Waves", artist: "Glass Animals", likes: 308, friends: 5 },
   ]);
 
-  const togglePlay = (songId) => {
-    setPlayingSongs(prev => ({ ...prev, [songId]: !prev[songId] }));
+  // 🎧 Usa o player global
+  const { isPlaying, currentTrack, playTrack } = usePlayer();
+
+  const handlePlay = (songKey) => {
+    playTrack(songKey); // troca ou pausa a música
   };
 
   const updateRecommendations = () => {
-    // Simulate update by shuffling array
     const shuffled = [...recommendedSongs].sort(() => Math.random() - 0.5);
     setRecommendedSongs(shuffled);
   };
 
   return (
     <>
-      {/* Descubra Sua Próxima Música Favorita */}
+      {/* Seção Descubra */}
       <section className="discover">
         <h2>Descubra Sua Próxima Música Favorita</h2>
         <div className="discover-grid">
@@ -84,11 +82,12 @@ export default function Discover() {
           </div>
         </div>
       </section>
-      {/* Seção Amigos */}
+
+      {/* Amigos ouvindo */}
       <section className="friends">
         <h2>Amigos Estão Ouvindo</h2>
         <div className="friends-grid">
-          {/* CARD 1 */}
+          {/* STARBOY */}
           <div className="friend-card">
             <div className="friend-header">
               <div className="friend-profile">
@@ -100,6 +99,7 @@ export default function Discover() {
               </div>
               <span className="online-dot"></span>
             </div>
+
             <div className="song-info">
               <img src={musica1} alt="Starboy" className="song-cover" />
               <div className="song-details">
@@ -107,21 +107,19 @@ export default function Discover() {
                 <p>The Weeknd</p>
               </div>
             </div>
+
             <div className="song-actions">
               <div className="song-stats">
-                <span>
-                  <FcLike /> 23
-                </span>
-                <span>
-                  <FaComment /> 5
-                </span>
+                <span><FcLike /> 23</span>
+                <span><FaComment /> 5</span>
               </div>
-              <button className="listen-btn" onClick={() => togglePlay('starboy')}>
-                {playingSongs['starboy'] ? <IoMdPause /> : <IoMdPlay />} Ouvir
+              <button className="listen-btn" onClick={() => handlePlay("starboy")}>
+                {isPlaying && currentTrack?.title === "Starboy" ? <IoMdPause /> : <IoMdPlay />} Ouvir
               </button>
             </div>
           </div>
-          {/* CARD 2 */}
+
+          {/* ADVENTURE */}
           <div className="friend-card">
             <div className="friend-header">
               <div className="friend-profile">
@@ -132,6 +130,7 @@ export default function Discover() {
                 </div>
               </div>
             </div>
+
             <div className="song-info">
               <img src={musica2} alt="Adventure of a Lifetime" className="song-cover" />
               <div className="song-details">
@@ -139,21 +138,19 @@ export default function Discover() {
                 <p>Coldplay</p>
               </div>
             </div>
+
             <div className="song-actions">
               <div className="song-stats">
-                <span>
-                  <FcLike /> 45
-                </span>
-                <span>
-                  <FaComment /> 12
-                </span>
+                <span><FcLike /> 45</span>
+                <span><FaComment /> 12</span>
               </div>
-              <button className="listen-btn" onClick={() => togglePlay('adventure')}>
-                {playingSongs['adventure'] ? <IoMdPause /> : <IoMdPlay />} Ouvir
+              <button className="listen-btn" onClick={() => handlePlay("adventure")}>
+                {isPlaying && currentTrack?.title === "Adventure of a Lifetime" ? <IoMdPause /> : <IoMdPlay />} Ouvir
               </button>
             </div>
           </div>
-          {/* CARD 3 */}
+
+          {/* MIRACLE */}
           <div className="friend-card">
             <div className="friend-header">
               <div className="friend-profile">
@@ -164,6 +161,7 @@ export default function Discover() {
                 </div>
               </div>
             </div>
+
             <div className="song-info">
               <img src={musica3} alt="Miracle" className="song-cover" />
               <div className="song-details">
@@ -171,69 +169,34 @@ export default function Discover() {
                 <p>The Score</p>
               </div>
             </div>
+
             <div className="song-actions">
               <div className="song-stats">
-                <span>
-                  <FcLike /> 45
-                </span>
-                <span>
-                  <FaComment /> 12
-                </span>
+                <span><FcLike /> 45</span>
+                <span><FaComment /> 12</span>
               </div>
-              <button className="listen-btn" onClick={() => togglePlay('miracle')}>
-                {playingSongs['miracle'] ? <IoMdPause /> : <IoMdPlay />} Ouvir
+              <button className="listen-btn" onClick={() => handlePlay("miracle")}>
+                {isPlaying && currentTrack?.title === "Miracle" ? <IoMdPause /> : <IoMdPlay />} Ouvir
               </button>
             </div>
           </div>
         </div>
       </section>
+
+      {/* Gêneros */}
       <section className="generos">
         <h2>Explorar Gêneros</h2>
         <div className="generos-grid">
-          <div className="genero-card rock">
-            <div className="genero-icone-bg bg-rock">
-              <GiGuitar size={24} />
-            </div>
-            <h3>Rock</h3>
-            <p>2.3K ouvindo</p>
-          </div>
-          <div className="genero-card pop">
-            <div className="genero-icone-bg bg-pop">
-              <FaHeadphonesAlt size={24} />
-            </div>
-            <h3>Pop</h3>
-            <p>4.1K ouvindo</p>
-          </div>
-          <div className="genero-card hiphop">
-            <div className="genero-icone-bg bg-hiphop">
-              <IoMdMicrophone size={24} />
-            </div>
-            <h3>Hip Hop</h3>
-            <p>1.8K ouvindo</p>
-          </div>
-          <div className="genero-card eletronica">
-            <div className="genero-icone-bg bg-eletronica">
-              <GiSoundWaves size={24} />
-            </div>
-            <h3>Eletrônica</h3>
-            <p>3.2K ouvindo</p>
-          </div>
-          <div className="genero-card jazz">
-            <div className="genero-icone-bg bg-jazz">
-              <LuPiano size={24} />
-            </div>
-            <h3>Jazz</h3>
-            <p>882 ouvindo</p>
-          </div>
-          <div className="genero-card mpb">
-            <div className="genero-icone-bg bg-mpb">
-              <LiaGuitarSolid size={24} />
-            </div>
-            <h3>MPB</h3>
-            <p>1.5K ouvindo</p>
-          </div>
+          <div className="genero-card rock"><div className="genero-icone-bg bg-rock"><GiGuitar size={24} /></div><h3>Rock</h3><p>2.3K ouvindo</p></div>
+          <div className="genero-card pop"><div className="genero-icone-bg bg-pop"><FaHeadphonesAlt size={24} /></div><h3>Pop</h3><p>4.1K ouvindo</p></div>
+          <div className="genero-card hiphop"><div className="genero-icone-bg bg-hiphop"><IoMdPlay size={24} /></div><h3>Hip Hop</h3><p>1.8K ouvindo</p></div>
+          <div className="genero-card eletronica"><div className="genero-icone-bg bg-eletronica"><GiSoundWaves size={24} /></div><h3>Eletrônica</h3><p>3.2K ouvindo</p></div>
+          <div className="genero-card jazz"><div className="genero-icone-bg bg-jazz"><LuPiano size={24} /></div><h3>Jazz</h3><p>882 ouvindo</p></div>
+          <div className="genero-card mpb"><div className="genero-icone-bg bg-mpb"><LiaGuitarSolid size={24} /></div><h3>MPB</h3><p>1.5K ouvindo</p></div>
         </div>
       </section>
+
+      {/* Recomendado */}
       <section className="recomendado">
         <div className="recomendado-header">
           <div>
@@ -242,8 +205,9 @@ export default function Discover() {
           </div>
           <button className="btn-atualizar" onClick={updateRecommendations}>Atualizar</button>
         </div>
+
         <div className="recomendado-grid">
-          {recommendedSongs.map(song => (
+          {recommendedSongs.map((song) => (
             <div key={song.id} className="recomendado-card">
               <img src={song.img} alt={`${song.title} - ${song.artist}`} className="recomendado-img" />
               <h3>{song.title}</h3>
@@ -257,6 +221,8 @@ export default function Discover() {
           ))}
         </div>
       </section>
+
+      {/* Em alta */}
       <section className="em-alta">
         <div className="em-alta-header">
           <h2>Em Alta Agora</h2>
@@ -265,8 +231,8 @@ export default function Discover() {
             <a href="#" className="ver-top">Ver Top 50</a>
           </div>
         </div>
+
         <div className="em-alta-lista">
-          {/* MÚSICA 1 */}
           <div className="em-alta-item">
             <span className="ranking">1</span>
             <img src={musica8} alt="As It Was" className="em-alta-img" />
@@ -281,12 +247,12 @@ export default function Discover() {
               <span className="tempo">3:47</span>
             </div>
           </div>
-          {/* MÚSICA 2 */}
+
           <div className="em-alta-item">
             <span className="ranking">2</span>
             <img src={musica9} alt="Die For You" className="em-alta-img" />
             <div className="em-alta-info">
-              <h3>Die for you</h3>
+              <h3>Die for You</h3>
               <p>Ariana Grande & The Weeknd</p>
             </div>
             <div className="em-alta-stats">
@@ -296,7 +262,7 @@ export default function Discover() {
               <span className="tempo">3:57</span>
             </div>
           </div>
-          {/* MÚSICA 3 */}
+
           <div className="em-alta-item">
             <span className="ranking">3</span>
             <img src={musica10} alt="Papoulas" className="em-alta-img" />

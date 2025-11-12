@@ -1,20 +1,20 @@
-import React from "react";
-import { Routes, Route } from "react-router-dom";
+import React from "react"
+import { Routes, Route } from "react-router-dom"
+import Topo from "./components/Topo"
+import Footer from "./components/Footer"
+import GlobalPlayer from "./components/GlobalPlayer"
 
-import Topo from "./components/Topo";
-import Footer from "./components/Footer";
-
-import HomePage from "./pages/HomePage";
-import LoginPage from "./pages/LoginPage";
-import Discover from "./pages/Discover";
-import About from "./pages/About";
-import NotFound from "./pages/NotFound";
-import Profile from "./pages/Profile";
-import Community from "./pages/Community";
-import SignUp from "./pages/SignUp";
-import Signin from "./pages/Signin";
-import Rooms from "./pages/Rooms";
-import EditProfile from "./pages/editProfile";
+import HomePage from "./pages/HomePage"
+import LoginPage from "./pages/LoginPage"
+import Discover from "./pages/Discover"
+import About from "./pages/About"
+import NotFound from "./pages/NotFound"
+import Profile from "./pages/Profile"
+import Community from "./pages/Community"
+import SignUp from "./pages/SignUp"
+import Signin from "./pages/Signin"
+import Rooms from "./pages/Rooms"
+import EditProfile from "./pages/editProfile"
 
 function App() {
   return (
@@ -22,6 +22,9 @@ function App() {
       <header>
         <Topo />
       </header>
+
+      {/* 🔥 Player sempre ativo */}
+      <GlobalPlayer />
 
       <main className="min-h-screen">
         <Routes>
@@ -43,7 +46,7 @@ function App() {
         <Footer />
       </footer>
     </>
-  );
+  )
 }
 
-export default App;
+export default App

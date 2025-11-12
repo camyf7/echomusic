@@ -1,38 +1,59 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import "./homePage.css"
-import { IoMdPlay, IoMdPause } from "react-icons/io"
-import { MdSkipNext, MdSkipPrevious } from "react-icons/md"
-import { FaHeart, FaRegHeart } from "react-icons/fa"
-import { GiSoundWaves } from "react-icons/gi"
-import { BiVolumeFull } from "react-icons/bi"
-import { FcLike } from "react-icons/fc"
-import { FaComment } from "react-icons/fa"
+import { useState } from "react";
+import "./homePage.css";
+import { IoMdPlay, IoMdPause } from "react-icons/io";
+import { MdSkipNext, MdSkipPrevious } from "react-icons/md";
+import { FaHeart, FaRegHeart } from "react-icons/fa";
+import { GiSoundWaves } from "react-icons/gi";
+import { BiVolumeFull } from "react-icons/bi";
+import { FcLike } from "react-icons/fc";
+import { FaComment } from "react-icons/fa";
 
-import Karen from '../../assets/usario_karen.png';
-import usuarioAna from '../../assets/usuario_ana_vitoria.png';
-import usuarioLarissa from '../../assets/usuario_larissa.png';
-import usuarioMariana from '../../assets/usario_mariana.png';
-import usuarioCarlos from '../../assets/usuario_carlos.jpeg';
-import usuarioArthur from '../../assets/usuario_arthur.jpeg';
-import Die from '../../assets/musica_die.png';
+import Karen from "../../assets/usario_karen.png";
+import usuarioAna from "../../assets/usuario_ana_vitoria.png";
+import usuarioLarissa from "../../assets/usuario_larissa.png";
+import usuarioMariana from "../../assets/usario_mariana.png";
+import usuarioCarlos from "../../assets/usuario_carlos.jpeg";
+import usuarioArthur from "../../assets/usuario_arthur.jpeg";
+import Die from "../../assets/musica_die.png";
+
+import { usePlayer } from "../../contexts/PlayerContext";
 
 export default function HomePage() {
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [liked, setLiked] = useState(false)
-  const [volume, setVolume] = useState(70)
-  const [progress, setProgress] = useState(45)
+const {
+  isPlaying,
+  setIsPlaying,
+  volume,
+  setVolume,
+  progress,
+  audioRef,
+  currentTrack,
+  nextTrack,
+  prevTrack, 
+} = usePlayer();
 
-  const togglePlayPause = () => setIsPlaying(!isPlaying)
-  const toggleLike = () => setLiked(!liked)
+
+  const [liked, setLiked] = useState(false);
+
+  const togglePlayPause = () => setIsPlaying(!isPlaying);
+  const toggleLike = () => setLiked(!liked);
+
+  const handleProgressClick = (e) => {
+    const audio = audioRef.current;
+    const rect = e.target.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const width = rect.width;
+    const duration = audio.duration;
+    audio.currentTime = (clickX / width) * duration;
+  };
 
   return (
     <>
-     {/* BACKGROUND ELEMENTS */}
-     <div className="hero-blur blur-1"></div>
-        <div className="hero-blur blur-2"></div>
-        
+      {/* BACKGROUND ELEMENTS */}
+      <div className="hero-blur blur-1"></div>
+      <div className="hero-blur blur-2"></div>
+
       {/* HERO SECTION WITH INTEGRATED PLAYER */}
       <section className="hero-section">
         <div className="hero-content">
@@ -63,39 +84,60 @@ export default function HomePage() {
                 </span>
               </div>
 
-              <div className="album-cover">
-              <img src={Die || "/placeholder.svg"} alt="musica die" />
-              </div>
+             <div className="album-cover">
+                 <img src={currentTrack.cover} alt={currentTrack.title} />
+             </div>
 
               <div className="track-info">
-                <h4>Die for you</h4>
-                <p>The Weeknd e Ariana Grande</p>
+                <h4>{currentTrack.title}</h4>
+                <p>{currentTrack.artist}</p>
               </div>
 
               {/* PROGRESS BAR */}
               <div className="progress-container">
-                <span className="time">1:45</span>
-                <div className="progress-bar">
+                <span className="time">
+                  {audioRef.current?.currentTime
+                    ? new Date(audioRef.current.currentTime * 1000)
+                        .toISOString()
+                        .substr(14, 5)
+                    : "0:00"}
+                </span>
+
+                <div className="progress-bar" onClick={handleProgressClick}>
                   <div className="progress-fill" style={{ width: `${progress}%` }}></div>
                 </div>
-                <span className="time">3:54</span>
+
+                <span className="time">
+                  {audioRef.current?.duration
+                    ? new Date(audioRef.current.duration * 1000)
+                        .toISOString()
+                        .substr(14, 5)
+                    : "3:54"}
+                </span>
               </div>
 
               {/* CONTROLS */}
               <div className="player-controls">
                 <button className="control-btn like-btn" onClick={toggleLike}>
-                  {liked ? <FaHeart size={20} style={{ color: "#ec4899" }} /> : <FaRegHeart size={20} />}
+                  {liked ? (
+                    <FaHeart size={20} style={{ color: "#ec4899" }} />
+                  ) : (
+                    <FaRegHeart size={20} />
+                  )}
                 </button>
 
-                <button className="control-btn">
+                {/* Botão anterior */}
+                <button className="control-btn" onClick={prevTrack}>
                   <MdSkipPrevious size={24} />
                 </button>
 
-                <button className="control-btn play-btn" onClick={togglePlayPause}>
+                {/* Play/pause */}
+                <button className="control-btn play-btn" onClick={() => setIsPlaying(!isPlaying)}>
                   {isPlaying ? <IoMdPause size={28} /> : <IoMdPlay size={28} />}
                 </button>
 
-                <button className="control-btn">
+                {/* Botão próxima */}
+                <button className="control-btn" onClick={nextTrack}>
                   <MdSkipNext size={24} />
                 </button>
 
@@ -103,6 +145,7 @@ export default function HomePage() {
                   <BiVolumeFull size={20} />
                 </button>
               </div>
+
 
               {/* VOLUME CONTROL */}
               <div className="volume-container">
@@ -118,7 +161,6 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-
       </section>
 
       {/* ACONTECENDO AGORA */}
