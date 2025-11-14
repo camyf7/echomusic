@@ -69,7 +69,7 @@ export default function Profile() {
         setUserData(parsed)
         return
       } catch (err) {
-        console.error("[v0] Erro ao parsear profile salvo:", err)
+        console.error(" Erro ao parsear profile salvo:", err)
       }
     }
 
@@ -91,7 +91,7 @@ export default function Profile() {
         setUserData(newProfile)
         localStorage.setItem(key, JSON.stringify(newProfile))
       } catch (err) {
-        console.error("[v0] Erro ao carregar Google User:", err)
+        console.error(" Erro ao carregar Google User:", err)
       }
     }
   }, [])
@@ -105,7 +105,7 @@ export default function Profile() {
           const updated = JSON.parse(e.newValue)
           setUserData(updated)
         } catch (err) {
-          console.error("[v0] Erro ao sincronizar storage:", err)
+          console.error(" Erro ao sincronizar storage:", err)
         }
       }
     }
@@ -129,7 +129,7 @@ export default function Profile() {
       )
     } catch (err) {
       if (err.name === "QuotaExceededError") {
-        console.error("[v0] localStorage cheio, tentando limpar cache...")
+        console.error(" localStorage cheio, tentando limpar cache...")
         try {
           // Remove imagens antigas para liberar espaço
           const keys = Object.keys(localStorage)
@@ -143,7 +143,7 @@ export default function Profile() {
           })
           localStorage.setItem(key, JSON.stringify(updatedProfile))
         } catch (e) {
-          console.error("[v0] Erro ao limpar cache:", e)
+          console.error(" Erro ao limpar cache:", e)
         }
       }
     }
@@ -159,11 +159,11 @@ export default function Profile() {
         const compressed = await compressImage(reader.result)
         persistProfile({ ...userData, avatar: compressed })
       } catch (err) {
-        console.error("[v0] Erro ao processar avatar:", err)
+        console.error(" Erro ao processar avatar:", err)
         persistProfile({ ...userData, avatar: reader.result })
       }
     }
-    reader.onerror = () => console.error("[v0] Erro ao ler arquivo")
+    reader.onerror = () => console.error(" Erro ao ler arquivo")
     reader.readAsDataURL(file)
   }
 
@@ -183,7 +183,7 @@ export default function Profile() {
           bannerUpdatedAt: Date.now(),
         })
       } catch (err) {
-        console.error("[v0] Erro ao processar banner:", err)
+        console.error(" Erro ao processar banner:", err)
         persistProfile({
           ...userData,
           banner: reader.result,
@@ -195,7 +195,7 @@ export default function Profile() {
     }
 
     reader.onerror = () => {
-      console.error("[v0] Erro ao ler arquivo de banner")
+      console.error(" Erro ao ler arquivo de banner")
       setIsLoadingBanner(false)
     }
 

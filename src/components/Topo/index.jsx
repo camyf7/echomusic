@@ -176,11 +176,7 @@ export default function Topo() {
             <FaUser style={{ marginRight: "8px" }} /> Perfil
           </Link>
         </li>
-        <li>
-          <Link to="/favoritos">
-            <FaHeart style={{ marginRight: "8px" }} /> Favoritos
-          </Link>
-        </li>
+       
         <li>
           <Link to="/minhas-musicas">
             <FaMusic style={{ marginRight: "8px" }} /> Minhas músicas
@@ -188,7 +184,7 @@ export default function Topo() {
         </li>
         <li>
           <Link to="/configuracoes">
-            <FaCog style={{ marginRight: "8px" }} /> Configurações
+            <FaCog style={{ marginRight: "8px" }} /> 404
           </Link>
         </li>
         <li onClick={handleLogout}>
