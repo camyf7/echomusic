@@ -2,10 +2,14 @@
 
 import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
+import rock from "../../assets/rock.jpg"
+import noiteromantica from "../../assets/noiteromantica.jpg"
+import domingo from "../../assets/domingo.jpg"
 import "./Profile.css"
 
 import placeholderAvatar from "../../assets/users.jpg"
-import placeholderBanner from "../../assets/banner.jpg"
+import mariana from "../../assets/usario_mariana.png"
+import pedro from "../../assets/usario_pedro.jpeg"
 
 export default function Profile() {
   const [privacySettings, setPrivacySettings] = useState({
@@ -335,14 +339,14 @@ export default function Profile() {
                 {
                   id: 2,
                   title: "Curtiu uma música",
-                  subtitle: "Evidências — Chitãozinho & Xororó",
+                  subtitle: "Papolas - Yago Oproprio",
                   time: "há 5 horas",
                   icon: "❤️",
                 },
                 {
                   id: 3,
                   title: "Seguiu um novo artista",
-                  subtitle: "Luísa Sonza",
+                  subtitle: "Baco exu do Blues",
                   time: "ontem",
                   icon: "👤",
                 },
@@ -359,26 +363,34 @@ export default function Profile() {
             </div>
           </section>
 
-          <section className="card">
-            <div className="card-header">
-              <h3>Minhas Playlists</h3>
-              <button className="btn btn-small">+ Nova Playlist</button>
-            </div>
-            <div className="playlists-grid">
-              {["Domingo Chill", "Rock Nacional", "Noite Romântica"].map((name, i) => (
-                <div className="playlist-card" key={i}>
-                  <div className="cover" style={{ backgroundImage: `url(${placeholderBanner})` }} />
-                  <div className="playlist-info">
-                    <div className="playlist-name">{name}</div>
-                    <div className="playlist-meta">15 músicas • 1h 22min</div>
-                  </div>
-                </div>
-              ))}
-              <div className="playlist-card empty">
-                <div className="placeholder">Criar nova playlist</div>
-              </div>
-            </div>
-          </section>
+         <section className="card">
+  <div className="card-header">
+    <h3>Minhas Playlists</h3>
+    <button className="btn btn-small">Ver Playlists</button>
+  </div>
+  <div className="playlists-grid">
+    {["Domingo Chill", "Rock Nacional", "Noite Romântica"].map((name, i) => {
+      // Definindo as imagens conforme o nome
+      let image;
+      if (name === "Domingo Chill") image = domingo;
+      else if (name === "Rock Nacional") image = rock;
+      else if (name === "Noite Romântica") image = noiteromantica;
+
+      return (
+        <div className="playlist-card" key={i}>
+          <div className="cover" style={{ backgroundImage: `url(${image})` }} />
+          <div className="playlist-info">
+            <div className="playlist-name">{name}</div>
+            <div className="playlist-meta">15 músicas • 1h 22min</div>
+          </div>
+        </div>
+      );
+    })}
+    <div className="playlist-card empty">
+      <div className="placeholder">Criar nova playlist</div>
+    </div>
+  </div>
+</section>
         </div>
 
         <aside className="right-col">

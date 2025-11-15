@@ -139,9 +139,8 @@ export default function NotFound404() {
 
        <br></br>
        <br></br>
-       <br></br>
-       <br></br>
-       <br></br>
+       
+       
         
 
         {/* Mensagem extra */}
