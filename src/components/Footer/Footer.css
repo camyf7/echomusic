@@ -58,32 +58,56 @@
           margin: 0;
         }
 
-        .socials {
-          display: flex;
-          gap: 10px;
-          margin-top: 6px;
+    .socials {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
 
-        }
-
-        .social-btn {
-  width: 48px;                /* Tamanho perfeito */
-  height: 48px;
-  border-radius: 50%;         /* círculo */
-  border: 2px solid #9340ff;  /* borda fina roxa */
-  background: rgb(133, 52, 136);    /* sem fundo */
+/* Botão SOCIAL redondo e proporcional */
+.social-btn {
+  width: 48px;              /* tamanho aumentado para melhor proporção */
+  height: 48px;             /* igual → círculo perfeito */
+  aspect-ratio: 1 / 1;      /* garante formato quadrado */
+  
+  border-radius: 100%;       /* 100% redondo */
+  padding: 0;               /* remove padding para controle preciso */
+  
+  /* Borda gradiente */
+  border: 2px solid transparent;
+  background: 
+    linear-gradient(#1a0b2e, #1a0b2e) padding-box,
+    linear-gradient(135deg, #9333ea, #ec4899) border-box;
+  
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #c4b5fd;             /* cor do ícone */
-  transition: 0.3s ease;
+  
+  box-shadow: 0 0 12px rgba(147, 51, 234, 0.35);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  /* Garante que não deforma */
+  flex-shrink: 0;
+}
+
+/* Ícones do Lucide — proporcionais ao botão */
+.social-btn svg {
+  width: 22px;              /* tamanho fixo para consistência */
+  height: 22px;             /* mantém proporção */
+  stroke-width: 2;
+  color: white;
+  flex-shrink: 0;           /* evita que o ícone deforme */
+}
+
+/* Hover */
+.social-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 20px rgba(236, 72, 153, 0.6);
+  border-color: transparent;
 }
 
 
-        .social-btn:hover {
-  background: rgba(147, 64, 255, 0.15);
-  box-shadow: 0 0 12px rgba(147, 64, 255, 0.4);
-  transform: translateY(-3px);
-}
 
 
         /* Links */

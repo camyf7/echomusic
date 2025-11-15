@@ -220,7 +220,8 @@ export default function Profile() {
         className={`profile-banner ${isLoadingBanner ? "loading" : ""}`}
         style={{
           backgroundImage: userData.banner
-            ? `url(${userData.banner}?t=${userData.bannerUpdatedAt})`
+  ? `url(${userData.banner})`
+
             : "linear-gradient(135deg, #9333ea, #a855f7, #7e22ce)",
           backgroundSize: "cover",
           backgroundPosition: "center",
@@ -240,13 +241,14 @@ export default function Profile() {
           </svg>
         </label>
         <input
-          id="banner-upload"
-          type="file"
-          accept="image/*"
-          onChange={handleBannerChange}
-          style={{ display: "none" }}
-          disabled={isLoadingBanner}
-        />
+  id="banner-upload"
+  type="file"
+  accept="image/*"
+  onChange={handleBannerChange}
+  style={{ display: "none" }}
+  disabled={isLoadingBanner}
+/>
+
 
         <div className="profile-banner-overlay">
           <div className="profile-header-inner">
@@ -267,7 +269,16 @@ export default function Profile() {
       </svg>
     </div>
   </label>
-  <input id="avatar-upload" type="file" accept="image/*" style={{ display: "none" }} />
+  
+    <input
+  id="avatar-upload"
+  type="file"
+  accept="image/*"
+  onChange={handleAvatarChange}
+  style={{ display: "none" }}
+/>
+
+
 </div>
  
 
@@ -420,8 +431,8 @@ export default function Profile() {
             <h3>Conexões Musicais</h3>
             <div className="friends-list">
               {[
-                { name: "Maria Silva", avatar: placeholderAvatar, info: "2 amigos em comum" },
-                { name: "João Santos", avatar: placeholderAvatar, info: "1 amigo em comum" },
+                { name: "Maria Silva", avatar: mariana, info: "2 amigos em comum" },
+                { name: "João Santos", avatar: pedro, info: "1 amigo em comum" },
               ].map((f, i) => (
                 <div className="friend-row" key={i}>
                   <img src={f.avatar || "/placeholder.svg"} alt={f.name} />
