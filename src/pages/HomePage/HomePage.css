@@ -41,6 +41,7 @@ body {
   line-height: 1.1;
   margin-bottom: 24px;
   text-shadow: 0 20px 50px rgba(147, 51, 234, 0.3);
+  letter-spacing: -0.02em;
 }
 
 .gradient-text {
@@ -49,6 +50,8 @@ body {
   -webkit-text-fill-color: transparent;
   background-clip: text;
   animation: gradientFlow 6s ease infinite;
+  display: inline-block;
+  margin-top: 8px;
 }
 
 @keyframes gradientFlow {
@@ -688,33 +691,244 @@ body {
   font-style: italic;
 }
 
+/* ===== CTA SECTION ===== */
+.cta-section {
+  padding: 100px 40px;
+  text-align: center;
+  background: linear-gradient(135deg, rgba(147, 51, 234, 0.1), rgba(236, 72, 153, 0.1));
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
 
+.cta-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
 
-/* ===== RESPONSIVE ===== */
+.cta-content h2 {
+  font-size: 3rem;
+  font-weight: 900;
+  margin-bottom: 24px;
+  background: linear-gradient(90deg, #9333ea, #ec4899);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.cta-content p {
+  font-size: 1.2rem;
+  color: #cbd5e1;
+  margin-bottom: 40px;
+  line-height: 1.6;
+}
+
+/* ===== MOBILE PLAYER STYLES ===== */
+.mobile-player-container {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(15, 12, 30, 0.98);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 16px 20px;
+  z-index: 1000;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.mobile-player-container.active {
+  transform: translateY(0);
+}
+
+.mobile-player-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.mobile-album-cover {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 2px solid rgba(147, 51, 234, 0.3);
+}
+
+.mobile-album-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mobile-track-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.mobile-track-info h4 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mobile-track-info p {
+  font-size: 0.8rem;
+  color: #a78bfa;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mobile-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mobile-control-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(147, 51, 234, 0.2);
+  border: 1px solid rgba(147, 51, 234, 0.4);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+}
+
+.mobile-control-btn:hover {
+  background: rgba(147, 51, 234, 0.4);
+  border-color: #9333ea;
+}
+
+.mobile-play-btn {
+  background: linear-gradient(135deg, #9333ea, #ec4899);
+  border: none;
+  box-shadow: 0 4px 15px rgba(147, 51, 234, 0.4);
+}
+
+.mobile-play-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(147, 51, 234, 0.6);
+}
+
+/* ===== MOBILE PROGRESS BAR ===== */
+.mobile-progress-container {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.mobile-progress-bar {
+  flex: 1;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.mobile-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #9333ea, #ec4899);
+  border-radius: 2px;
+  transition: width 0.1s linear;
+}
+
+.mobile-time {
+  font-size: 0.75rem;
+  color: #a78bfa;
+  font-weight: 600;
+  min-width: 30px;
+}
+
+/* ===== RESPONSIVE STYLES ===== */
+@media (max-width: 1200px) {
+  .hero-content {
+    gap: 60px;
+  }
+  
+  .hero-text h1 {
+    font-size: 4rem;
+  }
+  
+  .player-card {
+    max-width: 380px;
+    padding: 35px;
+  }
+}
+
 @media (max-width: 1024px) {
   .hero-content {
     grid-template-columns: 1fr;
-    gap: 40px;
+    gap: 50px;
+    text-align: center;
   }
 
   .hero-text h1 {
     font-size: 3.5rem;
   }
+  
+  .hero-player-container {
+    justify-content: center;
+    padding-right: 0;
+  }
+  
+  .player-card {
+    max-width: 450px;
+  }
+}
+
+@media (max-width: 900px) {
+  .hero-section {
+    padding: 80px 30px 120px;
+  }
+  
+  .hero-text h1 {
+    font-size: 3rem;
+  }
+  
+  .section {
+    padding: 70px 30px;
+  }
+  
+  .section-title {
+    font-size: 2.4rem;
+  }
 }
 
 @media (max-width: 768px) {
-
   .hero-section {
-    padding: 60px 20px;
+    padding: 60px 20px 100px;
     min-height: auto;
   }
 
   .hero-text h1 {
     font-size: 2.5rem;
+    text-align: center;
   }
 
   .hero-subtitle {
-    font-size: 1rem;
+    font-size: 1.1rem;
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .hero-actions {
+    justify-content: center;
+    gap: 15px;
   }
 
   .section {
@@ -727,11 +941,15 @@ body {
 
   .player-card {
     max-width: 100%;
-    padding: 30px;
+    padding: 30px 25px;
+  }
+  
+  .album-cover img {
+    height: 220px;
   }
 
   .cta-content {
-    padding: 50px 30px;
+    padding: 50px 20px;
   }
 
   .cta-content h2 {
@@ -747,11 +965,196 @@ body {
   .communities-grid,
   .testimonials-grid {
     grid-template-columns: 1fr;
+    gap: 20px;
   }
 
   .feature-icon {
     width: 70px;
     height: 70px;
   }
+  
+  .feature-card {
+    padding: 30px 20px;
+  }
+
+  /* Hide desktop player on mobile */
+  .hero-player-container {
+    display: none;
+  }
+
+  /* Show mobile player on mobile */
+  .mobile-player-container {
+    display: block;
+  }
+  
+  /* Show mobile progress bar */
+  .mobile-progress-container {
+    display: flex;
+  }
 }
 
+@media (max-width: 640px) {
+  .hero-text h1 {
+    font-size: 2.2rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+  
+  .btn {
+    padding: 12px 28px;
+    font-size: 0.95rem;
+  }
+  
+  .section-title {
+    font-size: 1.8rem;
+  }
+  
+  .posts-grid,
+  .features-grid,
+  .communities-grid,
+  .testimonials-grid {
+    gap: 16px;
+  }
+  
+  .post-card,
+  .feature-card,
+  .community-card,
+  .testimonial-card {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-section {
+    padding: 50px 15px 90px;
+  }
+  
+  .hero-text h1 {
+    font-size: 2rem;
+    line-height: 1.2;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+
+  .btn {
+    width: 100%;
+    max-width: 280px;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .section {
+    padding: 50px 15px;
+  }
+
+  .section-title {
+    font-size: 1.7rem;
+  }
+  
+  .section-description {
+    font-size: 1rem;
+    margin-bottom: 40px;
+  }
+
+  .player-card {
+    padding: 25px 20px;
+  }
+  
+  .album-cover img {
+    height: 200px;
+  }
+
+  .mobile-player-content {
+    gap: 12px;
+  }
+
+  .mobile-controls {
+    gap: 8px;
+  }
+
+  .mobile-control-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 0.9rem;
+  }
+  
+  .mobile-album-cover {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .mobile-track-info h4 {
+    font-size: 0.9rem;
+  }
+  
+  .mobile-track-info p {
+    font-size: 0.75rem;
+  }
+  
+  .cta-section {
+    padding: 70px 20px;
+  }
+  
+  .cta-content h2 {
+    font-size: 1.8rem;
+  }
+  
+  .cta-content p {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .hero-text h1 {
+    font-size: 1.8rem;
+  }
+  
+  .section-title {
+    font-size: 1.5rem;
+  }
+  
+  .posts-grid,
+  .features-grid,
+  .communities-grid,
+  .testimonials-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .mobile-player-content {
+    gap: 10px;
+  }
+  
+  .mobile-controls {
+    gap: 6px;
+  }
+  
+  .mobile-control-btn {
+    width: 34px;
+    height: 34px;
+  }
+}
+
+/* Additional spacing for "A Música Soa Melhor Juntos" on desktop */
+@media (min-width: 769px) {
+  .hero-text h1 {
+    letter-spacing: -0.02em;
+  }
+  
+  .gradient-text {
+    display: inline-block;
+    margin-top: 8px;
+  }
+}
+
+/* Safe area support for notches */
+@supports(padding: max(0px)) {
+  .mobile-player-container {
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+}

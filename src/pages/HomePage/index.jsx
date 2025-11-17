@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import "./homePage.css";
+import { useState, useEffect } from "react";
+import "./HomePage.css";
 import { IoMdPlay, IoMdPause } from "react-icons/io";
 import { MdSkipNext, MdSkipPrevious } from "react-icons/md";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
@@ -21,20 +21,35 @@ import Die from "../../assets/musica_die.png";
 import { usePlayer } from "../../contexts/PlayerContext";
 
 export default function HomePage() {
-const {
-  isPlaying,
-  setIsPlaying,
-  volume,
-  setVolume,
-  progress,
-  audioRef,
-  currentTrack,
-  nextTrack,
-  prevTrack, 
-} = usePlayer();
-
+  const {
+    isPlaying,
+    setIsPlaying,
+    volume,
+    setVolume,
+    progress,
+    audioRef,
+    currentTrack,
+    nextTrack,
+    prevTrack,
+  } = usePlayer();
 
   const [liked, setLiked] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
+
+  // Detecta o tamanho da tela
+  useEffect(() => {
+    const checkScreenSize = () => {
+      const width = window.innerWidth;
+      setIsMobile(width <= 768);
+      setIsTablet(width > 768 && width <= 1024);
+    };
+
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
 
   const togglePlayPause = () => setIsPlaying(!isPlaying);
   const toggleLike = () => setLiked(!liked);
@@ -46,6 +61,21 @@ const {
     const width = rect.width;
     const duration = audio.duration;
     audio.currentTime = (clickX / width) * duration;
+  };
+
+  const handleMobileProgressClick = (e) => {
+    const rect = e.target.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const width = rect.width;
+    const duration = audioRef.current.duration;
+    audioRef.current.currentTime = (clickX / width) * duration;
+  };
+
+  const formatTime = (seconds) => {
+    if (!seconds || isNaN(seconds)) return "0:00";
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   return (
@@ -74,94 +104,130 @@ const {
             </div>
           </div>
 
-          {/* MUSIC PLAYER - INTEGRATED IN HERO */}
-          <div className="hero-player-container">
-            <div className="player-card">
-              <div className="player-header">
-                <h3>Tocando agora</h3>
-                <span className="playing-indicator">
-                  <GiSoundWaves className="sound-wave" size={20} />
-                </span>
-              </div>
-
-             <div className="album-cover">
-                 <img src={currentTrack.cover} alt={currentTrack.title} />
-             </div>
-
-              <div className="track-info">
-                <h4>{currentTrack.title}</h4>
-                <p>{currentTrack.artist}</p>
-              </div>
-
-              {/* PROGRESS BAR */}
-              <div className="progress-container">
-                <span className="time">
-                  {audioRef.current?.currentTime
-                    ? new Date(audioRef.current.currentTime * 1000)
-                        .toISOString()
-                        .substr(14, 5)
-                    : "0:00"}
-                </span>
-
-                <div className="progress-bar" onClick={handleProgressClick}>
-                  <div className="progress-fill" style={{ width: `${progress}%` }}></div>
+          {/* DESKTOP/TABLET MUSIC PLAYER - Hidden on mobile */}
+          {!isMobile && (
+            <div className="hero-player-container">
+              <div className="player-card">
+                <div className="player-header">
+                  <h3>Tocando agora</h3>
+                  <span className="playing-indicator">
+                    <GiSoundWaves className="sound-wave" size={20} />
+                  </span>
                 </div>
 
-                <span className="time">
-                  {audioRef.current?.duration
-                    ? new Date(audioRef.current.duration * 1000)
-                        .toISOString()
-                        .substr(14, 5)
-                    : "3:54"}
-                </span>
-              </div>
+                <div className="album-cover">
+                  <img src={currentTrack.cover} alt={currentTrack.title} />
+                  <div className="playing-anim"></div>
+                </div>
 
-              {/* CONTROLS */}
-              <div className="player-controls">
-                <button className="control-btn like-btn" onClick={toggleLike}>
-                  {liked ? (
-                    <FaHeart size={20} style={{ color: "#ec4899" }} />
-                  ) : (
-                    <FaRegHeart size={20} />
-                  )}
-                </button>
+                <div className="track-info">
+                  <h4>{currentTrack.title}</h4>
+                  <p>{currentTrack.artist}</p>
+                </div>
 
-                {/* Botão anterior */}
-                <button className="control-btn" onClick={prevTrack}>
-                  <MdSkipPrevious size={24} />
-                </button>
+                {/* PROGRESS BAR */}
+                <div className="progress-container">
+                  <span className="time">
+                    {formatTime(audioRef.current?.currentTime)}
+                  </span>
 
-                {/* Play/pause */}
-                <button className="control-btn play-btn" onClick={() => setIsPlaying(!isPlaying)}>
-                  {isPlaying ? <IoMdPause size={28} /> : <IoMdPlay size={28} />}
-                </button>
+                  <div className="progress-bar" onClick={handleProgressClick}>
+                    <div className="progress-fill" style={{ width: `${progress}%` }}></div>
+                  </div>
 
-                {/* Botão próxima */}
-                <button className="control-btn" onClick={nextTrack}>
-                  <MdSkipNext size={24} />
-                </button>
+                  <span className="time">
+                    {formatTime(audioRef.current?.duration)}
+                  </span>
+                </div>
 
-                <button className="control-btn">
-                  <BiVolumeFull size={20} />
-                </button>
-              </div>
+                {/* CONTROLS */}
+                <div className="player-controls">
+                  <button className="control-btn like-btn" onClick={toggleLike}>
+                    {liked ? (
+                      <FaHeart size={20} style={{ color: "#ec4899" }} />
+                    ) : (
+                      <FaRegHeart size={20} />
+                    )}
+                  </button>
 
+                  <button className="control-btn" onClick={prevTrack}>
+                    <MdSkipPrevious size={24} />
+                  </button>
 
-              {/* VOLUME CONTROL */}
-              <div className="volume-container">
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={volume}
-                  onChange={(e) => setVolume(e.target.value)}
-                  className="volume-slider"
-                />
+                  <button className="control-btn play-btn" onClick={togglePlayPause}>
+                    {isPlaying ? <IoMdPause size={28} /> : <IoMdPlay size={28} />}
+                  </button>
+
+                  <button className="control-btn" onClick={nextTrack}>
+                    <MdSkipNext size={24} />
+                  </button>
+
+                  <button className="control-btn">
+                    <BiVolumeFull size={20} />
+                  </button>
+                </div>
+
+                {/* VOLUME CONTROL */}
+                <div className="volume-container">
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={volume}
+                    onChange={(e) => setVolume(e.target.value)}
+                    className="volume-slider"
+                  />
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </section>
+
+      {/* MOBILE PLAYER - Fixed at bottom */}
+      <div className={`mobile-player-container ${isMobile ? 'active' : ''}`}>
+        <div className="mobile-player-content">
+          <div className="mobile-album-cover">
+            <img src={currentTrack.cover} alt={currentTrack.title} />
+          </div>
+          
+          <div className="mobile-track-info">
+            <h4>{currentTrack.title}</h4>
+            <p>{currentTrack.artist}</p>
+          </div>
+          
+          <div className="mobile-controls">
+            <button className="mobile-control-btn like-btn" onClick={toggleLike}>
+              {liked ? (
+                <FaHeart size={16} style={{ color: "#ec4899" }} />
+              ) : (
+                <FaRegHeart size={16} />
+              )}
+            </button>
+            
+            <button className="mobile-control-btn mobile-play-btn" onClick={togglePlayPause}>
+              {isPlaying ? <IoMdPause size={18} /> : <IoMdPlay size={18} />}
+            </button>
+            
+            <button className="mobile-control-btn" onClick={nextTrack}>
+              <MdSkipNext size={18} />
+            </button>
+          </div>
+        </div>
+
+        {/* MOBILE PROGRESS BAR */}
+        <div className="mobile-progress-container">
+          <span className="mobile-time">
+            {formatTime(audioRef.current?.currentTime)}
+          </span>
+          <div className="mobile-progress-bar" onClick={handleMobileProgressClick}>
+            <div className="mobile-progress-fill" style={{ width: `${progress}%` }}></div>
+          </div>
+          <span className="mobile-time">
+            {formatTime(audioRef.current?.duration)}
+          </span>
+        </div>
+      </div>
 
       {/* ACONTECENDO AGORA */}
       <section className="section">
@@ -453,5 +519,5 @@ const {
         </div>
       </section>
     </>
-  )
+  );
 }
