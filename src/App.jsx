@@ -15,6 +15,7 @@ import SignUp from "./pages/SignUp"
 import Signin from "./pages/Signin"
 import Rooms from "./pages/Rooms"
 import EditProfile from "./pages/editProfile"
+import Playlist from "./pages/Playlist"
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/comunidades" element={<Community />} />
           <Route path="/editprofile" element={<EditProfile />} />
+          <Route path="/playlist" element={<Playlist />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>

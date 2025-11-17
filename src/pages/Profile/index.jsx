@@ -1,23 +1,31 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { Link } from "react-router-dom"
-import rock from "../../assets/rock.jpg"
-import noiteromantica from "../../assets/noiteromantica.jpg"
-import domingo from "../../assets/domingo.jpg"
-import "./Profile.css"
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
-import placeholderAvatar from "../../assets/users.jpg"
-import mariana from "../../assets/usario_mariana.png"
-import pedro from "../../assets/usario_pedro.jpeg"
+import rock from "../../assets/rock.jpg";
+import noiteromantica from "../../assets/noiteromantica.jpg";
+import domingo from "../../assets/domingo.jpg";
+
+import "./Profile.css";
+
+import placeholderAvatar from "../../assets/users.jpg";
+import mariana from "../../assets/usario_mariana.png";
+import pedro from "../../assets/usario_pedro.jpeg";
 
 export default function Profile() {
+  // ===========================
+  // PRIVACIDADE
+  // ===========================
   const [privacySettings, setPrivacySettings] = useState({
     perfilPublico: true,
     atividadeVisivel: true,
     playlistsPublicas: false,
-  })
+  });
 
+  // ===========================
+  // DADOS DO USUÁRIO
+  // ===========================
   const [userData, setUserData] = useState({
     name: "Usuário",
     username: "@user",
@@ -28,59 +36,62 @@ export default function Profile() {
     banner: "",
     bannerUpdatedAt: 0,
     stats: { playlists: 0, horasOuvidas: 0, seguidores: 0 },
-  })
+  });
 
-  const [isLoadingBanner, setIsLoadingBanner] = useState(false)
+  const [isLoadingBanner, setIsLoadingBanner] = useState(false);
 
-  // Helper: chave de storage por usuário
+  // ===========================
+  // Storage Key
+  // ===========================
   const getProfileKey = () => {
-    const googleUserRaw = localStorage.getItem("googleUser")
+    const googleUserRaw = localStorage.getItem("googleUser");
     if (googleUserRaw) {
       try {
-        const googleUser = JSON.parse(googleUserRaw)
-        if (googleUser?.email) return `profile_${googleUser.email}`
+        const googleUser = JSON.parse(googleUserRaw);
+        if (googleUser?.email) return `profile_${googleUser.email}`;
       } catch {}
     }
-    return "userProfile"
-  }
+    return "userProfile";
+  };
 
-  // Comprime imagem para evitar limite de localStorage
+  // ===========================
+  // Compressão de imagens
+  // ===========================
   const compressImage = async (dataUrl) => {
     return new Promise((resolve) => {
-      const img = new Image()
+      const img = new Image();
       img.onload = () => {
-        const canvas = document.createElement("canvas")
-        const ctx = canvas.getContext("2d")
-        canvas.width = img.width
-        canvas.height = img.height
-        ctx.drawImage(img, 0, 0)
-        const compressed = canvas.toDataURL("image/webp", 0.75)
-        resolve(compressed)
-      }
-      img.onerror = () => resolve(dataUrl)
-      img.src = dataUrl
-    })
-  }
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+        const compressed = canvas.toDataURL("image/webp", 0.75);
+        resolve(compressed);
+      };
+      img.onerror = () => resolve(dataUrl);
+      img.src = dataUrl;
+    });
+  };
 
-  // Load profile at mount
+  // ===========================
+  // Load inicial do perfil
+  // ===========================
   useEffect(() => {
-    const key = getProfileKey()
-    const saved = localStorage.getItem(key)
+    const key = getProfileKey();
+    const saved = localStorage.getItem(key);
 
     if (saved) {
       try {
-        const parsed = JSON.parse(saved)
-        setUserData(parsed)
-        return
-      } catch (err) {
-        console.error(" Erro ao parsear profile salvo:", err)
-      }
+        setUserData(JSON.parse(saved));
+        return;
+      } catch {}
     }
 
-    const googleUserRaw = localStorage.getItem("googleUser")
+    const googleUserRaw = localStorage.getItem("googleUser");
     if (googleUserRaw) {
       try {
-        const googleUser = JSON.parse(googleUserRaw)
+        const googleUser = JSON.parse(googleUserRaw);
         const newProfile = {
           name: googleUser.name || "Usuário",
           username: `@${(googleUser.email || "user").split("@")[0]}`,
@@ -91,148 +102,142 @@ export default function Profile() {
           banner: "",
           bannerUpdatedAt: 0,
           stats: { playlists: 12, horasOuvidas: 42, seguidores: 156 },
-        }
-        setUserData(newProfile)
-        localStorage.setItem(key, JSON.stringify(newProfile))
-      } catch (err) {
-        console.error(" Erro ao carregar Google User:", err)
-      }
+        };
+        setUserData(newProfile);
+        localStorage.setItem(key, JSON.stringify(newProfile));
+      } catch {}
     }
-  }, [])
+  }, []);
 
-  // Listen storage updates
+  // ===========================
+  // Sincronização entre abas
+  // ===========================
   useEffect(() => {
     const onStorage = (e) => {
-      const key = getProfileKey()
+      const key = getProfileKey();
       if (e.key === key && e.newValue) {
         try {
-          const updated = JSON.parse(e.newValue)
-          setUserData(updated)
-        } catch (err) {
-          console.error(" Erro ao sincronizar storage:", err)
-        }
+          setUserData(JSON.parse(e.newValue));
+        } catch {}
       }
-    }
+    };
 
-    window.addEventListener("storage", onStorage)
-    return () => window.removeEventListener("storage", onStorage)
-  }, [])
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
 
-  // Persist helper com tratamento robusto
+  // ===========================
+  // Persistência do perfil
+  // ===========================
   const persistProfile = (updatedProfile) => {
-    setUserData(updatedProfile)
-    const key = updatedProfile.email ? `profile_${updatedProfile.email}` : getProfileKey()
+    setUserData(updatedProfile);
+    const key = updatedProfile.email ? `profile_${updatedProfile.email}` : getProfileKey();
 
     try {
-      localStorage.setItem(key, JSON.stringify(updatedProfile))
+      localStorage.setItem(key, JSON.stringify(updatedProfile));
       window.dispatchEvent(
         new StorageEvent("storage", {
           key,
           newValue: JSON.stringify(updatedProfile),
-        }),
-      )
+        })
+      );
     } catch (err) {
       if (err.name === "QuotaExceededError") {
-        console.error(" localStorage cheio, tentando limpar cache...")
         try {
-          // Remove imagens antigas para liberar espaço
-          const keys = Object.keys(localStorage)
+          const keys = Object.keys(localStorage);
           keys.forEach((k) => {
             if (k.startsWith("profile_") && k !== key) {
-              const stored = JSON.parse(localStorage.getItem(k) || "{}")
-              stored.banner = ""
-              stored.avatar = ""
-              localStorage.setItem(k, JSON.stringify(stored))
+              const stored = JSON.parse(localStorage.getItem(k) || "{}");
+              stored.banner = "";
+              stored.avatar = "";
+              localStorage.setItem(k, JSON.stringify(stored));
             }
-          })
-          localStorage.setItem(key, JSON.stringify(updatedProfile))
-        } catch (e) {
-          console.error(" Erro ao limpar cache:", e)
-        }
+          });
+          localStorage.setItem(key, JSON.stringify(updatedProfile));
+        } catch {}
       }
     }
-  }
+  };
 
+  // ===========================
+  // Avatar update
+  // ===========================
   const handleAvatarChange = (e) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-    const reader = new FileReader()
+    const reader = new FileReader();
     reader.onload = async () => {
       try {
-        const compressed = await compressImage(reader.result)
-        persistProfile({ ...userData, avatar: compressed })
-      } catch (err) {
-        console.error(" Erro ao processar avatar:", err)
-        persistProfile({ ...userData, avatar: reader.result })
+        const compressed = await compressImage(reader.result);
+        persistProfile({ ...userData, avatar: compressed });
+      } catch {
+        persistProfile({ ...userData, avatar: reader.result });
       }
-    }
-    reader.onerror = () => console.error(" Erro ao ler arquivo")
-    reader.readAsDataURL(file)
-  }
+    };
+    reader.readAsDataURL(file);
+  };
 
+  // ===========================
+  // Banner update
+  // ===========================
   const handleBannerChange = (e) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-    setIsLoadingBanner(true)
-    const reader = new FileReader()
+    setIsLoadingBanner(true);
+    const reader = new FileReader();
 
     reader.onload = async () => {
       try {
-        const compressed = await compressImage(reader.result)
+        const compressed = await compressImage(reader.result);
         persistProfile({
           ...userData,
           banner: compressed,
           bannerUpdatedAt: Date.now(),
-        })
-      } catch (err) {
-        console.error(" Erro ao processar banner:", err)
+        });
+      } catch {
         persistProfile({
           ...userData,
           banner: reader.result,
           bannerUpdatedAt: Date.now(),
-        })
+        });
       } finally {
-        setIsLoadingBanner(false)
+        setIsLoadingBanner(false);
       }
-    }
+    };
 
-    reader.onerror = () => {
-      console.error(" Erro ao ler arquivo de banner")
-      setIsLoadingBanner(false)
-    }
+    reader.onerror = () => setIsLoadingBanner(false);
+    reader.readAsDataURL(file);
+  };
 
-    reader.readAsDataURL(file)
-  }
-
+  // ===========================
+  // Privacidade toggle
+  // ===========================
   const handlePrivacyToggle = (key) => {
-    setPrivacySettings((prev) => ({ ...prev, [key]: !prev[key] }))
-  }
+    setPrivacySettings((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
 
-  const getInitial = (name) => (name ? name.charAt(0).toUpperCase() : "?")
-  const stats = userData.stats || { playlists: 0, horasOuvidas: 0, seguidores: 0 }
+  // ===========================
+  // Helpers
+  // ===========================
+  const getInitial = (name) => (name ? name.charAt(0).toUpperCase() : "?");
+  const stats = userData.stats || { playlists: 0, horasOuvidas: 0, seguidores: 0 };
 
   return (
     <div className="profile-page">
-      {/* Banner */}
+      {/* ================== BANNER ================== */}
       <div
         className={`profile-banner ${isLoadingBanner ? "loading" : ""}`}
         style={{
           backgroundImage: userData.banner
-  ? `url(${userData.banner})`
-
+            ? `url(${userData.banner})`
             : "linear-gradient(135deg, #9333ea, #a855f7, #7e22ce)",
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
       >
-        <label
-          htmlFor="banner-upload"
-          className="banner-edit-btn"
-          title="Trocar banner"
-          style={{ pointerEvents: isLoadingBanner ? "none" : "auto" }}
-        >
+        <label htmlFor="banner-upload" className="banner-edit-btn" title="Trocar banner">
           <svg width="16" height="16" viewBox="0 0 24 24">
             <path
               fill="white"
@@ -240,68 +245,76 @@ export default function Profile() {
             />
           </svg>
         </label>
+
         <input
-  id="banner-upload"
-  type="file"
-  accept="image/*"
-  onChange={handleBannerChange}
-  style={{ display: "none" }}
-  disabled={isLoadingBanner}
-/>
+          id="banner-upload"
+          type="file"
+          accept="image/*"
+          onChange={handleBannerChange}
+          style={{ display: "none" }}
+          disabled={isLoadingBanner}
+        />
 
-
+        {/* OVERLAY */}
         <div className="profile-banner-overlay">
           <div className="profile-header-inner">
             <div className="profile-left">
-            <div className="avatar-block">
-  <label htmlFor="avatar-upload" className="avatar-label" title="Trocar foto">
-    {userData.avatar ? (
-      <img src={userData.avatar} alt="Avatar" className="avatar-img" />
-    ) : (
-      <div className="avatar-initial">{getInitial(userData.name)}</div>
-    )}
-    <div className="avatar-edit-icon">
-      <svg width="16" height="16" viewBox="0 0 24 24">
-        <path
-          fill="white"
-          d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM21.41 6.34a1.25 1.25 0 0 0 0-1.77l-2-2a1.25 1.25 0 0 0-1.77 0l-1.83 1.83 3.75 3.75 1.85-1.81z"
-        />
-      </svg>
-    </div>
-  </label>
-  
-    <input
-  id="avatar-upload"
-  type="file"
-  accept="image/*"
-  onChange={handleAvatarChange}
-  style={{ display: "none" }}
-/>
+              {/* Avatar */}
+              <div className="avatar-block">
+                <label htmlFor="avatar-upload" className="avatar-label" title="Trocar foto">
+                  {userData.avatar ? (
+                    <img src={userData.avatar} alt="Avatar" className="avatar-img" />
+                  ) : (
+                    <div className="avatar-initial">{getInitial(userData.name)}</div>
+                  )}
 
+                  <div className="avatar-edit-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24">
+                      <path
+                        fill="white"
+                        d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM21.41 6.34a1.25 1.25 0 0 0 0-1.77l-2-2a1.25 1.25 0 0 0-1.77 0l-1.83 1.83 3.75 3.75 1.85-1.81z"
+                      />
+                    </svg>
+                  </div>
+                </label>
 
-</div>
- 
+                <input
+                  id="avatar-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarChange}
+                  style={{ display: "none" }}
+                />
+              </div>
 
+              {/* Meta */}
               <div className="profile-meta">
                 <h1 className="profile-name">{userData.name}</h1>
+
                 <div className="profile-sub">
                   <span className="username">{userData.username}</span>
                   <span className="dot">•</span>
                   <span className="member-since">{userData.memberSince}</span>
                 </div>
+
                 <p className="profile-bio">{userData.bio}</p>
 
+                {/* Stats */}
                 <div className="profile-stats">
                   <div className="stat">
                     <div className="stat-value">{stats.playlists}</div>
                     <div className="stat-label">Playlists</div>
                   </div>
+
                   <div className="stat-divider" />
+
                   <div className="stat">
                     <div className="stat-value">{stats.horasOuvidas}</div>
                     <div className="stat-label">Horas Ouvidas</div>
                   </div>
+
                   <div className="stat-divider" />
+
                   <div className="stat">
                     <div className="stat-value">{stats.seguidores}</div>
                     <div className="stat-label">Seguidores</div>
@@ -310,6 +323,7 @@ export default function Profile() {
               </div>
             </div>
 
+            {/* BOTÕES */}
             <div className="profile-actions-area">
               <Link to="/editprofile" className="btn btn-edit">
                 Editar Perfil
@@ -317,8 +331,8 @@ export default function Profile() {
               <button
                 className="btn btn-share"
                 onClick={() => {
-                  navigator.clipboard?.writeText(window.location.href)
-                  alert("Link copiado!")
+                  navigator.clipboard?.writeText(window.location.href);
+                  alert("Link copiado!");
                 }}
               >
                 Compartilhar
@@ -328,16 +342,19 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Main content */}
+      {/* ===================== CONTEÚDO PRINCIPAL ===================== */}
       <div className="container grid">
+        {/* LADO ESQUERDO */}
         <div className="left-col">
+          {/* ATIVIDADE RECENTE */}
           <section className="card">
             <div className="card-header">
               <h3>Atividade Recente</h3>
-              <a className="link-primary" href="#">
+              <a href="#" className="link-primary">
                 Ver Tudo
               </a>
             </div>
+
             <div className="activity-list">
               {[
                 {
@@ -357,7 +374,7 @@ export default function Profile() {
                 {
                   id: 3,
                   title: "Seguiu um novo artista",
-                  subtitle: "Baco exu do Blues",
+                  subtitle: "Baco Exu do Blues",
                   time: "ontem",
                   icon: "👤",
                 },
@@ -374,39 +391,47 @@ export default function Profile() {
             </div>
           </section>
 
-         <section className="card">
-  <div className="card-header">
-    <h3>Minhas Playlists</h3>
-    <button className="btn btn-small">Ver Playlists</button>
-  </div>
-  <div className="playlists-grid">
-    {["Domingo Chill", "Rock Nacional", "Noite Romântica"].map((name, i) => {
-      // Definindo as imagens conforme o nome
-      let image;
-      if (name === "Domingo Chill") image = domingo;
-      else if (name === "Rock Nacional") image = rock;
-      else if (name === "Noite Romântica") image = noiteromantica;
+          {/* MINHAS PLAYLISTS */}
+          <section className="card">
+            <div className="card-header">
+              <h3>Minhas Playlists</h3>
+              <Link to="/playlist" className="btn btn-small">
+                  Ver Playlists
+              </Link>
+            </div>
+             <div className="playlists-grid">
+              {["Domingo Chill", "Rock Nacional", "Noite Romântica"].map((name, i) => {
+                let image =
+                  name === "Domingo Chill"
+                    ? domingo
+                    : name === "Rock Nacional"
+                    ? rock
+                    : noiteromantica;
 
-      return (
-        <div className="playlist-card" key={i}>
-          <div className="cover" style={{ backgroundImage: `url(${image})` }} />
-          <div className="playlist-info">
-            <div className="playlist-name">{name}</div>
-            <div className="playlist-meta">15 músicas • 1h 22min</div>
-          </div>
-        </div>
-      );
-    })}
-    <div className="playlist-card empty">
-      <div className="placeholder">Criar nova playlist</div>
-    </div>
-  </div>
-</section>
+                return (
+                  <div className="playlist-card" key={i}>
+                    <div className="cover" style={{ backgroundImage: `url(${image})` }} />
+                    <div className="playlist-info">
+                      <div className="playlist-name">{name}</div>
+                      <div className="playlist-meta">15 músicas • 1h 22min</div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              <div className="playlist-card empty">
+                <div className="placeholder">Criar nova playlist</div>
+              </div>
+            </div>
+          </section>
         </div>
 
+        {/* LADO DIREITO */}
         <aside className="right-col">
+          {/* DNA MUSICAL */}
           <section className="card dna-card">
             <h3>Meu DNA Musical</h3>
+
             <div className="dna-list">
               {[
                 { genre: "Rock Nacional", percentage: 82, color: "#8B5CF6" },
@@ -420,21 +445,29 @@ export default function Profile() {
                     <div className="genre-percent">{g.percentage}%</div>
                   </div>
                   <div className="genre-bar">
-                    <div className="genre-progress" style={{ width: `${g.percentage}%`, background: g.color }} />
+                    <div
+                      className="genre-progress"
+                      style={{
+                        width: `${g.percentage}%`,
+                        background: g.color,
+                      }}
+                    />
                   </div>
                 </div>
               ))}
             </div>
           </section>
 
+          {/* AMIGOS */}
           <section className="card">
             <h3>Conexões Musicais</h3>
+
             <div className="friends-list">
               {[
                 { name: "Maria Silva", avatar: mariana, info: "2 amigos em comum" },
                 { name: "João Santos", avatar: pedro, info: "1 amigo em comum" },
               ].map((f, i) => (
-                <div className="friend-row" key={i}>
+                <div key={i} className="friend-row">
                   <img src={f.avatar || "/placeholder.svg"} alt={f.name} />
                   <div>
                     <div className="friend-name">{f.name}</div>
@@ -445,29 +478,37 @@ export default function Profile() {
             </div>
           </section>
 
+          {/* PRIVACIDADE */}
           <section className="card privacy-card">
             <h3>Configurações de Privacidade</h3>
+
             <div className="privacy-list">
               {Object.entries(privacySettings).map(([key, value]) => (
-                <div className="privacy-row" key={key}>
+                <div key={key} className="privacy-row">
                   <div>
                     <div className="privacy-title">
                       {key === "perfilPublico"
                         ? "Perfil Público"
                         : key === "atividadeVisivel"
-                          ? "Atividade Visível"
-                          : "Playlists Públicas"}
+                        ? "Atividade Visível"
+                        : "Playlists Públicas"}
                     </div>
+
                     <div className="privacy-desc">
                       {key === "perfilPublico"
                         ? "Permitir que outros vejam seu perfil"
                         : key === "atividadeVisivel"
-                          ? "Mostrar o que você está ouvindo"
-                          : "Permitir descoberta das suas playlists"}
+                        ? "Mostrar o que você está ouvindo"
+                        : "Permitir descoberta das suas playlists"}
                     </div>
                   </div>
+
                   <label className="switch">
-                    <input type="checkbox" checked={value} onChange={() => handlePrivacyToggle(key)} />
+                    <input
+                      type="checkbox"
+                      checked={value}
+                      onChange={() => handlePrivacyToggle(key)}
+                    />
                     <span className="slider"></span>
                   </label>
                 </div>
@@ -477,5 +518,5 @@ export default function Profile() {
         </aside>
       </div>
     </div>
-  )
+  );
 }

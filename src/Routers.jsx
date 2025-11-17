@@ -6,6 +6,7 @@ import NotFound from './pages/NotFound';
 import About from './pages/About';
 import Profile from './pages/Profile';
 import EditProfile from './pages/editProfile';
+import Playlist from './pages/Playlist';
 
 export default function Routers() {
   return (
@@ -17,6 +18,7 @@ export default function Routers() {
       <Route path="/profile" element={<Profile />} />
       <Route path="/editprofile" element={<EditProfile />} />
       <Route path="*" element={<NotFound />} /> 
+      <Route path="/playlist" element={<Playlist />} />
     </Routes>
   );
 }

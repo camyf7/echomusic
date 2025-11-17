@@ -1,4 +1,10 @@
-import React, { createContext, useState, useRef, useEffect, useContext } from "react";
+import React, {
+  createContext,
+  useState,
+  useRef,
+  useEffect,
+  useContext,
+} from "react";
 
 // 🎵 Importa as músicas
 import dieForYou from "../assets/die-for-you.mp3";
@@ -6,16 +12,19 @@ import starboy from "../assets/starboy.mp3";
 import adventure from "../assets/adventure.mp3";
 import miracle from "../assets/miracle.mp3";
 
-// 🎨 Importa as capas
+
+// 🎨 Importa capas
 import capaDieForYou from "../assets/musica_die.png";
 import capaStarboy from "../assets/musica_starboy.png";
 import capaAdventure from "../assets/musica_adventure.png";
 import capaMiracle from "../assets/musica_miracle.png";
 
+
+
+
 const PlayerContext = createContext();
 
 export function PlayerProvider({ children }) {
-  // 🎶 Lista de músicas disponíveis
   const tracks = [
     {
       title: "Die For You",
@@ -43,21 +52,67 @@ export function PlayerProvider({ children }) {
     },
   ];
 
-  // Estados principais
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(70);
   const [progress, setProgress] = useState(0);
 
-  const currentTrack = tracks[currentTrackIndex];
-  const audioRef = useRef(new Audio(currentTrack.src));
+  // 🔊 UMA ÚNICA INSTÂNCIA DE ÁUDIO
+  const audioRef = useRef(new Audio(tracks[0].src));
 
-  // ▶️ Play/pause e volume
+  const currentTrack = tracks[currentTrackIndex];
+
+  // ▶️ Função universal para trocar e tocar música
+  const playTrack = async (index) => {
+    const audio = audioRef.current;
+
+    // Pausa áudio antigo
+    audio.pause();
+
+    // Troca a música
+    setCurrentTrackIndex(index);
+
+    // Troca o src do áudio SEM criar novo Audio()
+    audio.src = tracks[index].src;
+    audio.currentTime = 0;
+
+    try {
+      await audio.play();
+      setIsPlaying(true);
+    } catch (err) {
+      console.warn("Navegador bloqueou o autoplay:", err);
+      setIsPlaying(false);
+    }
+  };
+
+  // 🔄 Atualiza listeners quando troca de música
+  useEffect(() => {
+    const audio = audioRef.current;
+
+    const updateProgress = () => {
+      if (!audio.duration) return;
+      setProgress((audio.currentTime / audio.duration) * 100);
+    };
+
+    const handleEnded = () => {
+      nextTrack();
+    };
+
+    audio.addEventListener("timeupdate", updateProgress);
+    audio.addEventListener("ended", handleEnded);
+
+    return () => {
+      audio.removeEventListener("timeupdate", updateProgress);
+      audio.removeEventListener("ended", handleEnded);
+    };
+  }, [currentTrackIndex]);
+
+  // ▶️ Controlar play/pause
   useEffect(() => {
     const audio = audioRef.current;
 
     if (isPlaying) {
-      audio.play();
+      audio.play().catch((err) => console.warn("Autoplay bloqueado", err));
     } else {
       audio.pause();
     }
@@ -65,52 +120,32 @@ export function PlayerProvider({ children }) {
     audio.volume = volume / 100;
   }, [isPlaying, volume]);
 
-  // 🔄 Atualiza o áudio quando a faixa muda
-  useEffect(() => {
-    audioRef.current.pause();
-    audioRef.current = new Audio(currentTrack.src);
-    if (isPlaying) {
-      audioRef.current.play();
-    }
-  }, [currentTrackIndex]);
-
-  // 🎚️ Atualiza o progresso
-  useEffect(() => {
-    const audio = audioRef.current;
-    const updateProgress = () => {
-      const progressPercent = (audio.currentTime / audio.duration) * 100;
-      setProgress(progressPercent || 0);
-    };
-
-    audio.addEventListener("timeupdate", updateProgress);
-    return () => audio.removeEventListener("timeupdate", updateProgress);
-  }, []);
-
-  // ⏭️ Próxima faixa
+  // ⏭ Próxima música
   const nextTrack = () => {
-    setCurrentTrackIndex((prevIndex) =>
-      prevIndex === tracks.length - 1 ? 0 : prevIndex + 1
-    );
+    const next = (currentTrackIndex + 1) % tracks.length;
+    playTrack(next);
   };
 
-  // ⏮️ Faixa anterior
+  // ⏮ Anterior
   const prevTrack = () => {
-    setCurrentTrackIndex((prevIndex) =>
-      prevIndex === 0 ? tracks.length - 1 : prevIndex - 1
-    );
+    const prev =
+      currentTrackIndex === 0 ? tracks.length - 1 : currentTrackIndex - 1;
+    playTrack(prev);
   };
 
   return (
     <PlayerContext.Provider
       value={{
+        tracks,
+        currentTrack,
+        currentTrackIndex,
         isPlaying,
         setIsPlaying,
         volume,
         setVolume,
         progress,
-        setProgress,
+        playTrack,
         audioRef,
-        currentTrack,
         nextTrack,
         prevTrack,
       }}
