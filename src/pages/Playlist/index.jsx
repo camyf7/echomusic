@@ -1,225 +1,144 @@
-"use client";
-
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./Playlist.css";
-import { IoMdPlay, IoMdPause, IoMdHeart, IoMdHeartEmpty } from "react-icons/io";
+import { IoMdPlay, IoMdPause, IoMdHeartEmpty, IoMdSkipBackward, IoMdSkipForward, IoMdRepeat } from "react-icons/io";
 import { MdShare, MdPlaylistAdd } from "react-icons/md";
 import { FiClock } from "react-icons/fi";
 import { BsThreeDots } from "react-icons/bs";
 
-export default function PlaylistPage() {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTrack, setCurrentTrack] = useState(null);
-  const [playlistLiked, setPlaylistLiked] = useState(false);
-  const [likedTracks, setLikedTracks] = useState([]);
+import { usePlayer } from "../../contexts/PlayerContext";
+import capaBrasileira from "./../../assets/capa-playlist.png";
 
-  const playlist = {
-    title: "Vibes Brasileiras",
-    description: "As melhores músicas para relaxar e curtir o momento. Uma seleção especial com os maiores hits do Brasil.",
-    creator: "Echo Music",
-    cover: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&h=400&fit=crop",
-    totalTracks: 8,
-    duration: "32 min",
-    followers: "1.2k"
-  };
+export default function Playlist() {
+  const {
+    playTrack,
+    nextTrack,
+    prevTrack,
+    setRepeat,
+    repeat,
+    currentTrackIndex,
+    isPlaying,
+    setIsPlaying,
+    tracks,
+    setPlaylistTracks,
+    playlistBR
+  } = usePlayer();
 
-  const tracks = [
-    {
-      id: 1,
-      number: 1,
-      title: "Aquarela",
-      artist: "Toquinho",
-      album: "Clássicos Brasileiros",
-      duration: "3:45",
-      cover: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=100&h=100&fit=crop"
-    },
-    {
-      id: 2,
-      number: 2,
-      title: "Mas Que Nada",
-      artist: "Jorge Ben Jor",
-      album: "Samba Esquema Novo",
-      duration: "2:58",
-      cover: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=100&h=100&fit=crop"
-    },
-    {
-      id: 3,
-      number: 3,
-      title: "Águas de Março",
-      artist: "Elis Regina & Tom Jobim",
-      album: "Elis & Tom",
-      duration: "4:12",
-      cover: "https://images.unsplash.com/photo-1487180144351-b8472da7d491?w=100&h=100&fit=crop"
-    },
-    {
-      id: 4,
-      number: 4,
-      title: "Chega de Saudade",
-      artist: "João Gilberto",
-      album: "Chega de Saudade",
-      duration: "3:30",
-      cover: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100&h=100&fit=crop"
-    },
-    {
-      id: 5,
-      number: 5,
-      title: "Construção",
-      artist: "Chico Buarque",
-      album: "Construção",
-      duration: "4:05",
-      cover: "https://images.unsplash.com/photo-1506157786151-b8491531f063?w=100&h=100&fit=crop"
-    },
-    {
-      id: 6,
-      number: 6,
-      title: "Garota de Ipanema",
-      artist: "Tom Jobim & Vinicius de Moraes",
-      album: "Getz/Gilberto",
-      duration: "3:18",
-      cover: "https://images.unsplash.com/photo-1458560871784-56d23406c091?w=100&h=100&fit=crop"
-    },
-    {
-      id: 7,
-      number: 7,
-      title: "É Preciso Saber Viver",
-      artist: "Titãs",
-      album: "Cabeça Dinossauro",
-      duration: "3:52",
-      cover: "https://images.unsplash.com/photo-1483412033650-1015ddeb83d1?w=100&h=100&fit=crop"
-    },
-    {
-      id: 8,
-      number: 8,
-      title: "Sampa",
-      artist: "Caetano Veloso",
-      album: "Muito",
-      duration: "4:28",
-      cover: "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=100&h=100&fit=crop"
-    }
-  ];
+  const [formattedTracks, setFormattedTracks] = useState([]);
 
-  const togglePlay = (trackId) => {
-    if (currentTrack === trackId) {
+  useEffect(() => {
+    const loadPlaylist = async () => {
+      await setPlaylistTracks(playlistBR, 0);
+    };
+    loadPlaylist();
+  }, []);
+
+  useEffect(() => {
+    setFormattedTracks(tracks.map((track, index) => ({
+      ...track,
+      id: index,
+      number: index + 1,
+      album: "Brasil Hits"
+    })));
+  }, [tracks]);
+
+  const handlePlay = (index) => {
+    if (index === currentTrackIndex) {
       setIsPlaying(!isPlaying);
     } else {
-      setCurrentTrack(trackId);
-      setIsPlaying(true);
+      playTrack(index);
     }
   };
 
-  const toggleTrackLike = (trackId) => {
-    if (likedTracks.includes(trackId)) {
-      setLikedTracks(likedTracks.filter(id => id !== trackId));
-    } else {
-      setLikedTracks([...likedTracks, trackId]);
-    }
+  const playlistHeader = {
+    title: "Vibes Brasileiras",
+    description: "As melhores músicas nacionais para relaxar, dançar e curtir. Seleção especial de hits brasileiros.",
+    creator: "Echo Music",
+    cover: capaBrasileira,
+    followers: "980",
   };
 
   return (
     <div className="pl-page">
       <div className="pl-container">
-        {/* Header da Playlist */}
+
+        {/* HEADER */}
         <div className="pl-header">
           <div className="pl-cover">
-            <img src={playlist.cover} alt={playlist.title} />
+            <img src={playlistHeader.cover} alt={playlistHeader.title} />
           </div>
           <div className="pl-info">
-            <div className="pl-type">Playlist Pública</div>
-            <h1 className="pl-title">{playlist.title}</h1>
-            <p className="pl-description">{playlist.description}</p>
+            <div className="pl-type">Playlist pública</div>
+            <h1 className="pl-title">{playlistHeader.title}</h1>
+            <p className="pl-description">{playlistHeader.description}</p>
             <div className="pl-meta">
-              <span>{playlist.creator}</span>
+              <span>{playlistHeader.creator}</span>
               <div className="pl-separator" />
-              <span>{playlist.totalTracks} músicas</span>
+              <span>{formattedTracks.length} músicas</span>
               <div className="pl-separator" />
-              <span>{playlist.duration}</span>
+              <span>
+                {formattedTracks.reduce((acc, t) => {
+                  const [min, sec] = t.duration?.split(":").map(Number) || [0, 0];
+                  return acc + min * 60 + sec;
+                }, 0)}
+                {" s"}
+              </span>
               <div className="pl-separator" />
-              <span>{playlist.followers} seguidores</span>
+              <span>{playlistHeader.followers} seguidores</span>
             </div>
+
             <div className="pl-actions">
-              <button className="pl-action-btn pl-play-btn" onClick={() => togglePlay(1)}>
-                {isPlaying ? <IoMdPause size={20} /> : <IoMdPlay size={20} />}
-                {isPlaying ? 'Pausar' : 'Reproduzir'}
+              <button className="pl-action-btn pl-play-btn" onClick={() => handlePlay(0)}>
+                {isPlaying && currentTrackIndex === 0 ? (
+                  <><IoMdPause size={22} /> Pausar</>
+                ) : (
+                  <><IoMdPlay size={22} /> Reproduzir</>
+                )}
               </button>
-              <button
-                className={`pl-icon-btn ${playlistLiked ? 'liked' : ''}`}
-                onClick={() => setPlaylistLiked(!playlistLiked)}
-              >
-                {playlistLiked ? <IoMdHeart size={20} /> : <IoMdHeartEmpty size={20} />}
-              </button>
-              <button className="pl-icon-btn">
-                <MdShare size={20} />
-              </button>
-              <button className="pl-icon-btn">
-                <BsThreeDots size={20} />
-              </button>
+              <button className="pl-icon-btn" onClick={prevTrack}><IoMdSkipBackward size={22} /></button>
+              <button className="pl-icon-btn" onClick={nextTrack}><IoMdSkipForward size={22} /></button>
+              <button className={`pl-icon-btn ${repeat ? "active" : ""}`} onClick={() => setRepeat(!repeat)}><IoMdRepeat size={22} /></button>
+              <button className="pl-icon-btn"><IoMdHeartEmpty size={20} /></button>
+              <button className="pl-icon-btn"><MdShare size={20} /></button>
+              <button className="pl-icon-btn"><BsThreeDots size={20} /></button>
             </div>
           </div>
         </div>
 
-        {/* Lista de Músicas */}
+        {/* TRACKS */}
         <div className="pl-tracks-section">
           <div className="pl-tracks-header">
             <div>#</div>
             <div>Título</div>
             <div>Álbum</div>
-            <div style={{ textAlign: 'center' }}>
-              <FiClock size={16} />
-            </div>
+            <div style={{ textAlign: "center" }}><FiClock size={16} /></div>
             <div></div>
           </div>
 
-          {tracks.map((track) => (
-            <div
-              key={track.id}
-              className={`pl-track-item ${currentTrack === track.id ? 'playing' : ''}`}
-              onClick={() => togglePlay(track.id)}
-            >
-              <div className="pl-track-number">
+          {formattedTracks.map((track) => (
+            <div key={track.id} className={`pl-track-item ${currentTrackIndex === track.id ? "playing" : ""}`}>
+              <div className="pl-track-number" onClick={() => handlePlay(track.id)}>
                 <span className="number">{track.number}</span>
                 <span className="play-indicator">
-                  {currentTrack === track.id && isPlaying ? (
-                    <IoMdPause size={20} />
-                  ) : (
-                    <IoMdPlay size={20} />
-                  )}
+                  {currentTrackIndex === track.id && isPlaying ? <IoMdPause size={18} /> : <IoMdPlay size={18} />}
                 </span>
               </div>
-              <div className="pl-track-info">
-                <div className="pl-track-cover">
-                  <img src={track.cover} alt={track.title} />
-                </div>
-                <div className="pl-track-details">
-                  <h4>{track.title}</h4>
-                  <p>{track.artist}</p>
-                </div>
+
+              <div className="pl-track-info" onClick={() => handlePlay(track.id)}>
+                <div className="pl-track-cover"><img src={track.cover} alt={track.title} /></div>
+                <div className="pl-track-details"><h4>{track.title}</h4><p>{track.artist}</p></div>
               </div>
+
               <div className="pl-track-album">{track.album}</div>
               <div className="pl-track-duration">{track.duration}</div>
+
               <div className="pl-track-actions">
-                <button
-                  className={`pl-track-action-btn ${likedTracks.includes(track.id) ? 'liked' : ''}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleTrackLike(track.id);
-                  }}
-                >
-                  {likedTracks.includes(track.id) ? (
-                    <IoMdHeart size={18} />
-                  ) : (
-                    <IoMdHeartEmpty size={18} />
-                  )}
-                </button>
-                <button
-                  className="pl-track-action-btn"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <MdPlaylistAdd size={20} />
-                </button>
+                <button className="pl-track-action-btn"><IoMdHeartEmpty size={18} /></button>
+                <button className="pl-track-action-btn"><MdPlaylistAdd size={20} /></button>
               </div>
             </div>
           ))}
         </div>
+
       </div>
     </div>
   );
