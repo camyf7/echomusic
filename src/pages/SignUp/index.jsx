@@ -5,7 +5,7 @@ import logo from "../../assets/logo.png";
 import { FaGoogle, FaFacebookF } from "react-icons/fa";
 import { useState } from "react";
 import { signInWithGooglePopup } from "../../firebase";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { doLogin } from "../../lib/authHandler";
 import { useAuth } from "../../contexts/AuthContext";
 
@@ -21,15 +21,15 @@ export default function SignUp() {
   const navigate = useNavigate();
   const { setLogged, setUser } = useAuth();
 
-  // CADASTRO NO BACK-END
+  // CADASTRO + LOGIN AUTOMÁTICO
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
     try {
-      // 1 ▪ CADASTRA NO BACK-END
-      const res = await fetch("http://localhost:3000/usuarios/register", {
+      // 1 ▪ Cadastro
+      const res = await fetch("http://localhost:3000/user/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -40,15 +40,10 @@ export default function SignUp() {
       });
 
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erro ao criar conta");
 
-      if (data.error) {
-        setError(data.error);
-        setLoading(false);
-        return;
-      }
-
-      // 2 ▪ FAZ LOGIN AUTOMATICAMENTE
-      const loginRes = await fetch("http://localhost:3000/usuarios/login", {
+      // 2 ▪ Login automático
+      const loginRes = await fetch("http://localhost:3000/user/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -58,15 +53,10 @@ export default function SignUp() {
       });
 
       const loginData = await loginRes.json();
-
-      if (loginData.error) {
-        setError(loginData.error);
-        setLoading(false);
-        return;
-      }
+      console.log("Login Data:", loginData); // log para depuração
+      if (!loginRes.ok) throw new Error(loginData.error || "Erro ao logar");
 
       const token = loginData.token;
-
       const userData = {
         id: loginData.user.id,
         username: loginData.user.username,
@@ -79,17 +69,16 @@ export default function SignUp() {
       setLogged(true);
 
       navigate("/");
-
-    } catch (error) {
-      console.error("Erro no cadastro:", error);
-      setError("Erro ao criar conta.");
+    } catch (err) {
+      console.error("Erro no cadastro/login:", err);
+      setError(err.message || "Erro ao criar conta.");
     } finally {
       setLoading(false);
     }
   };
 
-  // LOGIN COM GOOGLE (CONTINUA IGUAL)
-  async function handleGoogleSignIn() {
+  // LOGIN COM GOOGLE
+  const handleGoogleSignIn = async () => {
     setLoading(true);
     setError(null);
 
@@ -97,25 +86,25 @@ export default function SignUp() {
       const result = await signInWithGooglePopup();
       if (!result) throw new Error("Falha ao obter informações do Google.");
 
-      const token = await result.getIdToken();
+      const token = await result.user.getIdToken(); // corrigido
       const userData = {
-        name: result.displayName,
-        email: result.email,
-        photoURL: result.photoURL,
-        uid: result.uid,
+        name: result.user.displayName,
+        email: result.user.email,
+        photoURL: result.user.photoURL,
+        uid: result.user.uid,
       };
 
       doLogin(token, userData);
       setUser(userData);
       setLogged(true);
       navigate("/");
-    } catch (error) {
-      console.error("Erro ao cadastrar com Google:", error);
-      setError(error.message || "Erro ao fazer cadastro.");
+    } catch (err) {
+      console.error("Erro ao cadastrar com Google:", err);
+      setError(err.message || "Erro ao fazer cadastro.");
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   // INPUT GENÉRICO
   const handleChange = (e) => {
@@ -178,18 +167,23 @@ export default function SignUp() {
         </div>
 
         <div className="social-login">
-          <button className="social-btn google" onClick={handleGoogleSignIn} disabled={loading}>
+          <button
+            className="social-btn google"
+            onClick={handleGoogleSignIn}
+            disabled={loading}
+          >
             <FaGoogle size={18} />
             <span>Google</span>
           </button>
-          <button className="social-btn facebook">
+
+          <button className="social-btn facebook" disabled>
             <FaFacebookF size={18} />
             <span>Facebook</span>
           </button>
         </div>
 
         <p className="signup-login">
-          Já tem uma conta? <a href="/signin">Entrar</a>
+          Já tem uma conta? <Link to="/signin">Entrar</Link>
         </p>
 
         {error && <p style={{ color: "red", marginTop: "12px" }}>{error}</p>}
