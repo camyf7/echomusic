@@ -17,7 +17,6 @@ export default function SignUp() {
     email: "",
     password: "",
   });
-
   const navigate = useNavigate();
   const { setLogged, setUser } = useAuth();
 
@@ -42,33 +41,11 @@ export default function SignUp() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Erro ao criar conta");
 
-      // 2 ▪ Login automático
-      const loginRes = await fetch("http://localhost:3000/user/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-        }),
-      });
+      // Mostra mensagem de sucesso
+      alert("Usuário cadastrado com sucesso!");
 
-      const loginData = await loginRes.json();
-      console.log("Login Data:", loginData); // log para depuração
-      if (!loginRes.ok) throw new Error(loginData.error || "Erro ao logar");
-
-      const token = loginData.token;
-      const userData = {
-        id: loginData.user.id,
-        username: loginData.user.username,
-        email: loginData.user.email,
-        avatar_url: loginData.user.avatar_url,
-      };
-
-      doLogin(token, userData);
-      setUser(userData);
-      setLogged(true);
-
-      navigate("/");
+      // 2 ▪ Redireciona para página de login
+      navigate("/signin");
     } catch (err) {
       console.error("Erro no cadastro/login:", err);
       setError(err.message || "Erro ao criar conta.");
@@ -86,7 +63,7 @@ export default function SignUp() {
       const result = await signInWithGooglePopup();
       if (!result) throw new Error("Falha ao obter informações do Google.");
 
-      const token = await result.user.getIdToken(); // corrigido
+      const token = await result.user.getIdToken();
       const userData = {
         name: result.user.displayName,
         email: result.user.email,
@@ -97,7 +74,9 @@ export default function SignUp() {
       doLogin(token, userData);
       setUser(userData);
       setLogged(true);
-      navigate("/");
+
+      alert("Usuário logado com sucesso!");
+      navigate("/signin"); // redireciona pro login ou profile se quiser
     } catch (err) {
       console.error("Erro ao cadastrar com Google:", err);
       setError(err.message || "Erro ao fazer cadastro.");

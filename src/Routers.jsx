@@ -2,11 +2,12 @@ import { Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import Discover from './pages/Discover';
 import Community from "./pages/Community";
-import NotFound from './pages/NotFound';
 import About from './pages/About';
 import Profile from './pages/Profile';
 import EditProfile from './pages/editProfile';
 import Playlist from './pages/Playlist';
+import Buscar from "./pages/Buscar";
+import NotFound from './pages/NotFound';
 
 export default function Routers() {
   return (
@@ -17,8 +18,11 @@ export default function Routers() {
       <Route path="/comunidades" element={<Community />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/editprofile" element={<EditProfile />} />
-      <Route path="*" element={<NotFound />} /> 
       <Route path="/playlist" element={<Playlist />} />
+      <Route path="/buscar" element={<Buscar />} />
+
+      {/* SEMPRE POR ÚLTIMO */}
+      <Route path="*" element={<NotFound />} /> 
     </Routes>
   );
 }

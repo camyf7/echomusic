@@ -929,3 +929,18 @@
 .mobile-menu-overlay::-webkit-scrollbar-track {
   background: transparent;
 }
+
+.profile-dropdown-dark {
+  position: absolute;
+  top: 55px;
+  right: 0;
+  background: rgba(12, 15, 50, 0.98);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(147, 51, 234, 0.3);
+  border-radius: 16px;
+  overflow: hidden;
+  width: 220px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  animation: slideDown 0.3s ease;
+  z-index: 999;
+}

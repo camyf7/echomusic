@@ -15,13 +15,8 @@ export default function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  // =========================
-  // LOGIN COM BACK-END
-  // =========================
   const handleLogin = async () => {
-    if (!email || !password) {
-      return alert("Preencha email e senha");
-    }
+    if (!email || !password) return alert("Preencha email e senha");
 
     try {
       const res = await fetch("http://localhost:3000/user/login", {
@@ -32,14 +27,9 @@ export default function SignIn() {
 
       const data = await res.json();
 
-      if (data.error) {
-        return alert(data.error);
-      }
+      if (data.error) return alert(data.error);
 
-      // TOKEN
       const token = data.token;
-
-      // USUÁRIO QUE O BACK-END MANDOU
       const userData = {
         id: data.user.id,
         username: data.user.username,
@@ -47,23 +37,22 @@ export default function SignIn() {
         avatar_url: data.user.avatar_url || null,
       };
 
-      // Salvar nos helpers
       doLogin(token, userData);
-
-      // Salvar no contexto
       setUser(userData);
       setLogged(true);
 
-      navigate("/");
+      // 🔹 Alerta não bloqueante
+      setTimeout(() => {
+        alert("Usuário logado com sucesso!");
+        navigate("/profile"); // redireciona
+      }, 10);
+
     } catch (error) {
       console.error("Erro no login:", error);
       alert("Erro ao tentar entrar");
     }
   };
 
-  // =========================
-  // LOGIN COM GOOGLE
-  // =========================
   const handleGoogleSignIn = async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
@@ -80,7 +69,12 @@ export default function SignIn() {
       doLogin(token, userData);
       setUser(userData);
       setLogged(true);
-      navigate("/");
+
+      setTimeout(() => {
+        alert("Usuário logado com sucesso!");
+        navigate("/profile");
+      }, 10);
+
     } catch (error) {
       console.error("Erro ao fazer login com Google:", error);
       alert("Falha ao entrar com Google");
@@ -91,7 +85,6 @@ export default function SignIn() {
     <div className="signin-wrapper">
       <div className="signin-card">
         <img src={logo} alt="EchoMusic Logo" className="signin-logo" />
-
         <h2>Entrar na EchoMusic</h2>
         <p className="signin-subtitle">Bem-vindo de volta ao ritmo.</p>
 

@@ -275,14 +275,19 @@
   font-size: 2.5rem;
   margin-bottom: 12px;
   display: inline-block;
-  animation: float 3s ease-in-out infinite;
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
-  transition: transform 0.3s ease;
+  transition: filter 0.3s ease, transform 0.3s ease;
 }
+
+/* Animação só quando passar o mouse */
+.timeline-icon:hover {
+  animation: float 0.8s ease-in-out infinite;
+}
+
 
 .timeline-content:hover .timeline-icon {
   transform: scale(1.2) rotate(5deg);
-  animation: floatFast 1.5s ease-in-out infinite;
+  animation: floatFast 1.0s ease-in-out infinite;
 }
 
 @keyframes float {

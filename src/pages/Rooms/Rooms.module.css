@@ -3,7 +3,7 @@
 /* Base Container */
 .roomsContainer {
   min-height: 100vh;
-  background: linear-gradient(135deg, #0a1628 0%, #0d1b2a 50%, #1b263b 100%);
+  background: linear-gradient(135deg, #0f0c1e 0%, #1a0933 50%, #0f0c1e 100%);
   color: white;
   font-family: system-ui, -apple-system, sans-serif;
 }
@@ -280,7 +280,7 @@
 
 .viewAllBtn:hover {
   color: #93c5fd;
-  background: rgba(59, 130, 246, 0.1);
+  background: rgba(104, 136, 187, 0.1);
 }
 
 .featuredGrid {

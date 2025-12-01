@@ -17,6 +17,9 @@ import Rooms from "./pages/Rooms"
 import EditProfile from "./pages/editProfile"
 import Playlist from "./pages/Playlist"
 
+// ⭐ Adicionando a página Buscar
+import Buscar from "./pages/Buscar"
+
 function App() {
   return (
     <>
@@ -40,6 +43,10 @@ function App() {
           <Route path="/comunidades" element={<Community />} />
           <Route path="/editprofile" element={<EditProfile />} />
           <Route path="/playlist" element={<Playlist />} />
+
+          {/* ⭐ ROTA DA PÁGINA DE BUSCA */}
+          <Route path="/buscar" element={<Buscar />} />
+
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>

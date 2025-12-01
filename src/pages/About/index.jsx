@@ -233,18 +233,19 @@ export default function About() {
         <div className="section-header">
           <h2>Nossa Missão e Valores</h2>
           <p>Transformar a forma como as pessoas se conectam através da música,  criando uma comunidade global unida pelo amor aos sons.</p>
-        </div>
+        
         
         <div className="mission-text-content">
           <p>
             Acreditamos que a música é a linguagem universal que transcende fronteiras, culturas e diferenças. Nossa missão é criar um espaço onde todos possam descobrir, compartilhar e celebrar a música juntos.
           </p>
         </div>
+        </div>
 
         <br></br>
       <br></br>
-      <br></br>
-      <br></br>
+      
+      
 
         <div className="values-grid">
           {[

@@ -1,37 +1,42 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
+import { 
+  getAuth, 
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut 
+} from "firebase/auth";
 
+// 🔥 SUA CONFIGURAÇÃO DO FIREBASE
 const firebaseConfig = {
-  apiKey: "AIzaSyD488EVLQXcIlqtnnJBmZ54SOGn-1X2GVs",
-  authDomain: "echomusic-1-8735e.firebaseapp.com",
-  projectId: "echomusic-1-8735e",
-  storageBucket: "echomusic-1-8735e.firebasestorage.app",
-  messagingSenderId: "58607629067",
-  appId: "1:58607629067:web:6386b26e393eeba262a80e",
-  measurementId: "G-0XR1P2QEK3"
+  apiKey: "SUA_KEY",
+  authDomain: "SUA_DOMAIN",
+  projectId: "SEU_PROJECT",
+  storageBucket: "SEU_BUCKET",
+  messagingSenderId: "SEU_SENDER",
+  appId: "SEU_APP",
 };
 
-// Inicializa o app Firebase
+// Inicializa Firebase
 const app = initializeApp(firebaseConfig);
 
 // Autenticação
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 
-// Função de login com popup do Google
+// ===============================
+// 🔵 Função personalizada (OBRIGATÓRIA) 
+// ===============================
+// Essa função é a que o seu front tenta importar.
+// Sem ela, dá erro.
 export async function signInWithGooglePopup() {
   try {
     const result = await signInWithPopup(auth, googleProvider);
     return result.user;
   } catch (error) {
-    console.error("Erro ao fazer login com Google:", error);
+    console.error("Erro ao logar com Google:", error);
     throw error;
   }
 }
 
-// Função de logout
-export async function logout() {
-  await signOut(auth);
-}
-
-export { auth, googleProvider };
+// Exports principais
+export { auth, googleProvider, signOut };

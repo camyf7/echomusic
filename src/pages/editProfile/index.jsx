@@ -1,57 +1,86 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // 🔹 para redirecionamento
+import axios from "axios";
 import "./EditProfile.css";
 import defaultAvatar from "../../assets/users.jpg";
 
 const EditProfile = () => {
   const [avatar, setAvatar] = useState(defaultAvatar);
-  const [name, setName] = useState("");
   const [username, setUsername] = useState("");
-  const [bio, setBio] = useState("");
-  const [memberSince] = useState("Membro desde 2025");
+  const [email, setEmail] = useState("");
+  const [bio, setBio] = useState(""); // 🔹 bio
+  const [loading, setLoading] = useState(false);
 
-  // 🔹 Carrega dados do localStorage
+  const navigate = useNavigate(); // 🔹 hook de navegação
+  const token = localStorage.getItem("token"); // JWT armazenado
+
+  // 🔹 Carrega dados do backend
   useEffect(() => {
-    const savedData = localStorage.getItem("userProfile");
-    if (savedData) {
-      const parsed = JSON.parse(savedData);
-      setAvatar(parsed.avatar || defaultAvatar);
-      setName(parsed.name || "");
-      setUsername(parsed.username || "");
-      setBio(parsed.bio || "");
-    }
-  }, []);
+    if (!token) return;
 
-  // 🔹 Atualiza a imagem do avatar (sem alterar banner)
-  const handleAvatarChange = (event) => {
-    const file = event.target.files[0];
+    const fetchUser = async () => {
+      try {
+        const res = await axios.get("http://localhost:3000/user/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const user = res.data.user; // backend envia { user }
+        setUsername(user.username || "");
+        setEmail(user.email || "");
+        setAvatar(user.avatar_url || defaultAvatar);
+        setBio(user.bio || ""); // 🔹 atualiza bio
+      } catch (err) {
+        console.error("Erro ao buscar perfil:", err);
+        alert("Falha ao carregar perfil");
+      }
+    };
+
+    fetchUser();
+  }, [token]);
+
+  // 🔹 Atualiza a imagem do avatar localmente
+  const handleAvatarChange = (e) => {
+    const file = e.target.files[0];
     if (file) {
       const imageUrl = URL.createObjectURL(file);
       setAvatar(imageUrl);
     }
   };
 
-  // 🔹 Salva os dados e mantém o banner existente
-  const handleSave = (e) => {
+  // 🔹 Salva alterações chamando o backend
+  const handleSave = async (e) => {
     e.preventDefault();
-    try {
-      const savedData = JSON.parse(localStorage.getItem("userProfile")) || {};
-      const updatedProfile = {
-        ...savedData, // mantém banner, data, etc.
-        avatar,
-        name,
-        username,
-        bio,
-        memberSince,
-      };
+    if (!token) return alert("Usuário não autenticado");
 
-      localStorage.setItem("userProfile", JSON.stringify(updatedProfile));
-      alert("Perfil atualizado com sucesso!");
-      window.location.href = "/profile";
-    } catch (error) {
-      console.error("Erro ao salvar perfil:", error);
-      alert("Falha ao salvar perfil (localStorage).");
+    setLoading(true);
+
+    try {
+      const res = await axios.put(
+        "http://localhost:3000/user/update",
+        { username, email, avatar_url: avatar, bio }, // envia bio
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      // 🔹 Atualiza front com os dados retornados
+      const updatedUser = res.data.user;
+      setUsername(updatedUser.username);
+      setEmail(updatedUser.email);
+      setAvatar(updatedUser.avatar_url || defaultAvatar);
+      setBio(updatedUser.bio || "");
+
+      alert(res.data.message || "Perfil atualizado com sucesso!");
+
+      // 🔹 Redireciona para a página de perfil após salvar
+      navigate("/profile"); // substitua "/profile" pela rota real da página de perfil
+    } catch (err) {
+      console.error("Erro ao atualizar perfil:", err);
+      alert(err.response?.data?.error || "Falha ao atualizar perfil");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -80,17 +109,7 @@ const EditProfile = () => {
         </div>
 
         <div className="input-group">
-          <label>Nome</label>
-          <input
-            type="text"
-            placeholder="Digite seu nome"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-        </div>
-
-        <div className="input-group">
-          <label>Usuário</label>
+          <label>Nome de usuário</label>
           <input
             type="text"
             placeholder="@usuario"
@@ -100,22 +119,28 @@ const EditProfile = () => {
         </div>
 
         <div className="input-group">
+          <label>Email</label>
+          <input
+            type="email"
+            placeholder="email@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
+
+        <div className="input-group">
           <label>Biografia</label>
           <textarea
             rows="3"
             placeholder="Fale um pouco sobre você..."
             value={bio}
-            onChange={(e) => setBio(e.target.value)}
+            onChange={(e) => setBio(e.target.value)} // 🔹 bio
           />
         </div>
 
-        <div className="member-info">
-          <p>{memberSince}</p>
-        </div>
-
         <div className="buttons">
-          <button type="submit" className="btn-save">
-            Salvar Alterações
+          <button type="submit" className="btn-save" disabled={loading}>
+            {loading ? "Salvando..." : "Salvar Alterações"}
           </button>
           <button
             type="button"

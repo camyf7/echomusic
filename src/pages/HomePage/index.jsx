@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./HomePage.css";
 import { IoMdPlay, IoMdPause } from "react-icons/io";
 import { MdSkipNext, MdSkipPrevious } from "react-icons/md";
@@ -21,6 +22,7 @@ import Die from "../../assets/musica_die.png";
 import { usePlayer } from "../../contexts/PlayerContext";
 
 export default function HomePage() {
+  const navigate = useNavigate();
   const {
     isPlaying,
     setIsPlaying,
@@ -100,7 +102,9 @@ export default function HomePage() {
             </p>
             <div className="hero-actions">
               <button className="btn btn-primary">Começar Agora</button>
-              <button className="btn btn-secondary">Explorar Comunidades</button>
+              <button className="btn btn-secondary"onClick={() => navigate("/comunidades")}>
+                Explorar Comunidades
+              </button>
             </div>
           </div>
 

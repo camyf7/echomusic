@@ -1,4 +1,4 @@
-import { useState } from "react";
+ import { useState, useEffect } from "react";
 import "./Community.css";
 import {
   LuHeart,
@@ -15,7 +15,79 @@ import {
   LuChevronRight,
   LuSend,
   LuTrash2,
+  LuPencil,
 } from "react-icons/lu";
+
+const API_BASE = "http://localhost:3000/comments";
+
+// GET comentários da comunidade
+async function getComentarios(comunidadeId) {
+  const res = await fetch(`${API_BASE}/comunidade/${comunidadeId}`);
+  if (!res.ok) {
+    const txt = await res.text();
+    throw new Error(`Erro ao buscar comentários: ${res.status} ${txt}`);
+  }
+  return res.json();
+}
+
+// POST criar comentário
+async function criarComentario(texto, comunidadeId) {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_BASE}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({
+      texto: texto,
+      comunidade_id: comunidadeId,
+    }),
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || `Erro ao criar comentário (${res.status})`);
+  }
+
+  return res.json();
+}
+
+// PUT editar comentário
+async function editarComentarioAPI(id, novoTexto) {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_BASE}/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ texto: novoTexto }),
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || `Erro ao editar comentário (${res.status})`);
+  }
+
+  return res.json();
+}
+
+// DELETE excluir comentário
+async function excluirComentarioAPI(id) {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_BASE}/${id}`, {
+    method: "DELETE",
+    headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || `Erro ao excluir comentário (${res.status})`);
+  }
+
+  return res.json();
+}
 
 const Communities = () => {
   const [likedPosts, setLikedPosts] = useState({});
@@ -34,9 +106,7 @@ const Communities = () => {
       cover: "🔥",
       likes: 23,
       comments: 8,
-      commentsList: [
-        { id: 1, user: "Ana Oliveira", text: "Essa música é incrível! Me transporta para outro mundo.", time: "30min" },
-      ],
+      commentsList: [],
     },
     {
       id: 2,
@@ -44,12 +114,11 @@ const Communities = () => {
       avatar: "🎤",
       time: "2h",
       type: "text",
-      content: "Qual foi o último show que vocês foram que mudou completamente sua perspectiva musical?",
+      content:
+        "Qual foi o último show que vocês foram que mudou completamente sua perspectiva musical?",
       likes: 45,
       comments: 12,
-      commentsList: [
-        { id: 3, user: "Lucas Ferreira", text: "O show do Tash Sultana no Rock in Rio 2019. Nunca tinha ouvido nada igual!", time: "1h" },
-      ],
+      commentsList: [],
     },
     {
       id: 3,
@@ -58,16 +127,64 @@ const Communities = () => {
       time: "3h",
       type: "event",
       title: "Roda de Samba Virtual – Quinta-feira às 20h",
-      description: "Vamos nos reunir para uma roda de samba especial com participação do sambista João de Volta! Tragam seus instrumentos e vozes para uma noite inesquecível.",
+      description:
+        "Vamos nos reunir para uma roda de samba especial com participação do sambista João de Volta! Tragam seus instrumentos e vozes para uma noite inesquecível.",
       date: "Quinta, 29 Ago",
       participants: 47,
       likes: 15,
       comments: 5,
-      commentsList: [
-        { id: 5, user: "Ricardo Lima", text: "Mal posso esperar! Vou levar meu cavaquinho.", time: "2h" },
-      ],
+      commentsList: [],
     },
   ]);
+
+  const [editingComment, setEditingComment] = useState(null);
+  const [editingText, setEditingText] = useState("");
+
+  const usuarioLogado = JSON.parse(localStorage.getItem("user") || "null");
+
+  // 🔥 FUNÇÃO DE TEMPO RELATIVO
+  const formatDate = (iso) => {
+    try {
+      const d = new Date(iso);
+      const agora = new Date();
+      const diff = (agora - d) / 1000; // segundos
+
+      if (diff < 60) return "agora mesmo";
+      if (diff < 3600) return `há ${Math.floor(diff / 60)} min`;
+      if (diff < 86400) return `há ${Math.floor(diff / 3600)} h`;
+      if (diff < 2592000) return `há ${Math.floor(diff / 86400)} dias`;
+      if (diff < 31536000) return `há ${Math.floor(diff / 2592000)} meses`;
+
+      return `há ${Math.floor(diff / 31536000)} anos`;
+    } catch {
+      return iso;
+    }
+  };
+
+  // CARREGAR COMENTÁRIOS
+  useEffect(() => {
+    async function carregar() {
+      try {
+        const comentarios = await getComentarios(1);
+
+        setPosts((prev) =>
+          prev.map((post) => {
+            const filtrados = comentarios.filter(
+              (c) => c.comunidade_id === post.id
+            );
+            return {
+              ...post,
+              commentsList: filtrados,
+              comments: filtrados.length,
+            };
+          })
+        );
+      } catch (err) {
+        console.error("Erro ao carregar comentários:", err);
+      }
+    }
+    carregar();
+  }, []);
 
   const toggleLike = (id) => {
     setLikedPosts((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -81,44 +198,88 @@ const Communities = () => {
     setNewComment((prev) => ({ ...prev, [postId]: text }));
   };
 
-  const submitComment = (postId) => {
-    const text = newComment[postId]?.trim();
-    if (!text) return;
+  const submitComment = async (postId) => {
+    const texto = (newComment[postId] || "").trim();
+    if (!texto) return;
 
-    setPosts((prevPosts) =>
-      prevPosts.map((post) =>
-        post.id === postId
-          ? {
-              ...post,
-              comments: post.comments + 1,
-              commentsList: [
-                ...post.commentsList,
-                {
-                  id: Date.now(),
-                  user: "Você", // Simulate current user
-                  text,
-                  time: "Agora",
-                },
-              ],
-            }
-          : post
-      )
-    );
-    setNewComment((prev) => ({ ...prev, [postId]: "" }));
+    try {
+      const novo = await criarComentario(texto, postId);
+
+      setPosts((prev) =>
+        prev.map((post) =>
+          post.id === postId
+            ? {
+                ...post,
+                commentsList: [...post.commentsList, novo],
+                comments: post.comments + 1,
+              }
+            : post
+        )
+      );
+
+      setNewComment((prev) => ({ ...prev, [postId]: "" }));
+    } catch (err) {
+      console.error("Erro ao criar comentário:", err);
+      alert(err.message || "Não foi possível criar o comentário");
+    }
   };
 
-  const deleteComment = (postId, commentId) => {
-    setPosts((prevPosts) =>
-      prevPosts.map((post) =>
-        post.id === postId
-          ? {
-              ...post,
-              comments: Math.max(0, post.comments - 1),
-              commentsList: post.commentsList.filter((c) => c.id !== commentId),
-            }
-          : post
-      )
-    );
+  const deleteComment = async (postId, commentId) => {
+    if (!confirm("Deseja realmente excluir este comentário?")) return;
+
+    try {
+      await excluirComentarioAPI(commentId);
+
+      setPosts((prev) =>
+        prev.map((post) =>
+          post.id === postId
+            ? {
+                ...post,
+                commentsList: post.commentsList.filter(
+                  (c) => c.id !== commentId
+                ),
+                comments: Math.max(0, post.comments - 1),
+              }
+            : post
+        )
+      );
+    } catch (err) {
+      console.error("Erro ao excluir comentário:", err);
+      alert(err.message || "Não foi possível excluir o comentário");
+    }
+  };
+
+  const startEditing = (comment) => {
+    setEditingComment(comment.id);
+    setEditingText(comment.conteudo);
+  };
+
+  const saveEdit = async (postId, commentId) => {
+    const texto = (editingText || "").trim();
+    if (!texto) return;
+
+    try {
+      const atualizado = await editarComentarioAPI(commentId, texto);
+
+      setPosts((prev) =>
+        prev.map((post) =>
+          post.id === postId
+            ? {
+                ...post,
+                commentsList: post.commentsList.map((c) =>
+                  c.id === commentId ? atualizado : c
+                ),
+              }
+            : post
+        )
+      );
+
+      setEditingComment(null);
+      setEditingText("");
+    } catch (err) {
+      console.error("Erro ao editar:", err);
+      alert(err.message || "Erro ao editar comentário.");
+    }
   };
 
   const filteredPosts = posts.filter((post) =>
@@ -132,11 +293,25 @@ const Communities = () => {
   ];
 
   const discoverCommunities = [
-    { name: "Eletrônica Brasil", icon: "🎧", description: "Sons eletrônicos, techno, ambiente e a cena eletrônica brasileira" },
-    { name: "Hip Hop Nacional", icon: "🎤", description: "Rap, trap e toda a cultura hip hop brasileira" },
+    {
+      name: "Eletrônica Brasil",
+      icon: "🎧",
+      description:
+        "Sons eletrônicos, techno, ambiente e a cena eletrônica brasileira",
+    },
+    {
+      name: "Hip Hop Nacional",
+      icon: "🎤",
+      description: "Rap, trap e toda a cultura hip hop brasileira",
+    },
   ];
 
-  const trending = ["#NovoAlbumCaetano", "#RockInRio2025", "#IndieDescoberta", "#SambaModerno"];
+  const trending = [
+    "#NovoAlbumCaetano",
+    "#RockInRio2025",
+    "#IndieDescoberta",
+    "#SambaModerno",
+  ];
 
   return (
     <div className="communitiesPageContainer">
@@ -149,9 +324,12 @@ const Communities = () => {
         </div>
         <div className="headerContent">
           <div className="headerInfo">
-            <h1 className="headerTitle gradientText">Suas Comunidades Musicais</h1>
+            <h1 className="headerTitle gradientText">
+              Suas Comunidades Musicais
+            </h1>
             <p className="headerDescription">
-              Conecte-se com pessoas apaixonadas pelos mesmos sons que você. Descubra, discuta e compartilhe músicas em comunidades vibrantes.
+              Conecte-se com pessoas apaixonadas pelos mesmos sons que você.
+              Descubra, discuta e compartilhe músicas em comunidades vibrantes.
             </p>
           </div>
           <div className="headerActions ctaButtons">
@@ -176,13 +354,17 @@ const Communities = () => {
               </h2>
               <div className="feedTabs categoryTabs">
                 <button
-                  className={`categoryTab ${activeTab === "recentes" ? "categoryTabActive" : ""}`}
+                  className={`categoryTab ${
+                    activeTab === "recentes" ? "categoryTabActive" : ""
+                  }`}
                   onClick={() => setActiveTab("recentes")}
                 >
                   Recentes
                 </button>
                 <button
-                  className={`categoryTab ${activeTab === "populares" ? "categoryTabActive" : ""}`}
+                  className={`categoryTab ${
+                    activeTab === "populares" ? "categoryTabActive" : ""
+                  }`}
                   onClick={() => setActiveTab("populares")}
                 >
                   Populares
@@ -211,8 +393,14 @@ const Communities = () => {
                           <h4 className="trackSong">{post.title}</h4>
                           <p className="trackArtist">{post.artist}</p>
                         </div>
-                        <button className="playBtn" onClick={() => togglePlay(post.id)}>
-                          <LuPlay size={20} fill={playing === post.id ? "white" : "none"} />
+                        <button
+                          className="playBtn"
+                          onClick={() => togglePlay(post.id)}
+                        >
+                          <LuPlay
+                            size={20}
+                            fill={playing === post.id ? "white" : "none"}
+                          />
                         </button>
                       </div>
                     </div>
@@ -221,12 +409,6 @@ const Communities = () => {
                   {post.type === "text" && (
                     <div className="postContent cardDescription">
                       <p>{post.content}</p>
-                      {post.commentsList.slice(0, 1).map((comment) => (
-                        <div key={comment.id} className="reply commentItem">
-                          <strong className="commentUser">{comment.user}</strong>: {comment.text}
-                          <span className="commentTime"> · {comment.time}</span>
-                        </div>
-                      ))}
                     </div>
                   )}
 
@@ -245,37 +427,96 @@ const Communities = () => {
                     </div>
                   )}
 
-                  {/* Comments Input - Hidden in prototype, but functional */}
+                  {/* Comments Section */}
                   <div className="commentsSection">
                     <div className="commentsList">
-                      {post.commentsList.slice(1).map((comment) => (
+                      {post.commentsList.length === 0 && (
+                        <div className="commentItem">
+                          Seja o primeiro a comentar.
+                        </div>
+                      )}
+
+                      {post.commentsList.map((comment) => (
                         <div key={comment.id} className="commentItem">
                           <div className="commentHeader">
-                            <strong className="commentUser">{comment.user}</strong>
-                            <span className="commentTime"> · {comment.time}</span>
-                            {comment.user === "Você" && (
-                              <button
-                                className="deleteCommentBtn"
-                                onClick={() => deleteComment(post.id, comment.id)}
-                              >
-                                <LuTrash2 size={14} />
-                              </button>
+                            <strong>
+                              {comment.user?.username ||
+                                "Usuário #" + comment.user_id}
+                            </strong>
+                            <span> · {formatDate(comment.created_at)}</span>
+
+                            {usuarioLogado?.id === comment.user_id && (
+                              <>
+                                <button
+                                  className="deleteCommentBtn"
+                                  onClick={() => startEditing(comment)}
+                                  title="Editar"
+                                >
+                                  <LuPencil size={14} />
+                                </button>
+
+                                <button
+                                  className="deleteCommentBtn"
+                                  onClick={() =>
+                                    deleteComment(post.id, comment.id)
+                                  }
+                                  title="Excluir"
+                                >
+                                  <LuTrash2 size={14} />
+                                </button>
+                              </>
                             )}
                           </div>
-                          <p className="commentText">{comment.text}</p>
+
+                          {editingComment === comment.id ? (
+                            <div className="editContainer">
+                              <input
+                                className="commentInput"
+                                value={editingText}
+                                onChange={(e) => setEditingText(e.target.value)}
+                                onKeyDown={(e) =>
+                                  e.key === "Enter" &&
+                                  saveEdit(post.id, comment.id)
+                                }
+                                autoFocus
+                              />
+                              <button
+                                className="submitCommentBtn"
+                                onClick={() => saveEdit(post.id, comment.id)}
+                              >
+                                Salvar
+                              </button>
+                              <button
+                                className="deleteCommentBtn"
+                                onClick={() => setEditingComment(null)}
+                              >
+                                Cancelar
+                              </button>
+                            </div>
+                          ) : (
+                            <p className="commentText">{comment.conteudo}</p>
+                          )}
                         </div>
                       ))}
                     </div>
+
                     <div className="newCommentInput">
                       <input
                         type="text"
                         placeholder="Adicione um comentário..."
                         value={newComment[post.id] || ""}
-                        onChange={(e) => handleCommentChange(post.id, e.target.value)}
-                        onKeyPress={(e) => e.key === "Enter" && submitComment(post.id)}
+                        onChange={(e) =>
+                          handleCommentChange(post.id, e.target.value)
+                        }
+                        onKeyDown={(e) =>
+                          e.key === "Enter" && submitComment(post.id)
+                        }
                         className="commentInput"
                       />
-                      <button className="submitCommentBtn" onClick={() => submitComment(post.id)}>
+                      <button
+                        className="submitCommentBtn"
+                        onClick={() => submitComment(post.id)}
+                      >
                         <LuSend size={16} />
                       </button>
                     </div>
@@ -284,11 +525,19 @@ const Communities = () => {
                   <div className="postActions cardFooter">
                     <div className="actionsLeft">
                       <button
-                        className={`actionBtn heartIcon ${likedPosts[post.id] ? "heartHovered" : ""}`}
+                        className={`actionBtn heartIcon ${
+                          likedPosts[post.id] ? "heartHovered" : ""
+                        }`}
                         onClick={() => toggleLike(post.id)}
                       >
-                        <LuHeart size={18} fill={likedPosts[post.id] ? "#ff4444" : "none"} />
-                        <span>{(Number(post.likes) || 0) + (likedPosts[post.id] ? 1 : 0)}</span>
+                        <LuHeart
+                          size={18}
+                          fill={likedPosts[post.id] ? "#ff4444" : "none"}
+                        />
+                        <span>
+                          {(Number(post.likes) || 0) +
+                            (likedPosts[post.id] ? 1 : 0)}
+                        </span>
                       </button>
                       <button className="actionBtn">
                         <LuMessageCircle size={18} />
@@ -300,7 +549,9 @@ const Communities = () => {
                     </div>
                     {post.type === "event" && (
                       <div className="eventButtons">
-                        <button className="btnParticipate enterBtn gradientBluePurple">Participar</button>
+                        <button className="btnParticipate enterBtn gradientBluePurple">
+                          Participar
+                        </button>
                         <button className="btnListen enterBtn gradientPurplePink">
                           <LuMusic size={16} /> Escutar ao Vivo
                         </button>
@@ -311,7 +562,9 @@ const Communities = () => {
               ))}
             </div>
             <div className="loadMoreContainer">
-              <button className="loadMore loadMoreBtn">Carregar Mais Posts</button>
+              <button className="loadMore loadMoreBtn">
+                Carregar Mais Posts
+              </button>
             </div>
           </section>
         </div>
@@ -326,10 +579,16 @@ const Communities = () => {
             <div className="categoryGrid">
               {communities.map((c) => (
                 <div key={c.id} className="communityItem categoryCard">
-                  <span className="communityIcon categoryCardHeader">{c.icon}</span>
+                  <span className="communityIcon categoryCardHeader">
+                    {c.icon}
+                  </span>
                   <div>
-                    <div className="communityName categoryCardTitle">{c.name}</div>
-                    <div className="communityMembers categoryCardDescription">{c.members}</div>
+                    <div className="communityName categoryCardTitle">
+                      {c.name}
+                    </div>
+                    <div className="communityMembers categoryCardDescription">
+                      {c.members}
+                    </div>
                   </div>
                   <LuChevronRight size={16} />
                 </div>
@@ -349,7 +608,9 @@ const Communities = () => {
                   <div className="discoverIcon">{dc.icon}</div>
                   <div className="discoverText">
                     <div className="categoryCardTitle">{dc.name}</div>
-                    <div className="categoryCardDescription">{dc.description}</div>
+                    <div className="categoryCardDescription">
+                      {dc.description}
+                    </div>
                   </div>
                 </div>
                 <button className="joinBtn categoryEnterBtn">Entrar</button>
@@ -367,7 +628,9 @@ const Communities = () => {
                 <div key={i} className="trendingItem">
                   <LuTrendingUp size={14} />
                   <span>{topic}</span>
-                  <span className="postsCount">{Math.floor(Math.random() * 1000) + 100} posts</span>
+                  <span className="postsCount">
+                    {Math.floor(Math.random() * 1000) + 100} posts
+                  </span>
                 </div>
               ))}
             </div>
@@ -379,8 +642,12 @@ const Communities = () => {
               <LuStar size={20} />
               <h3 className="featureTitle">Desafio da Semana</h3>
             </div>
-            <p className="featureDescription">Compartilhe uma música que representa seu estado emocional atual</p>
-            <button className="btnChallenge enterBtn gradientCyanBlue">Participar</button>
+            <p className="featureDescription">
+              Compartilhe uma música que representa seu estado emocional atual
+            </p>
+            <button className="btnChallenge enterBtn gradientCyanBlue">
+              Participar
+            </button>
           </section>
         </div>
       </div>

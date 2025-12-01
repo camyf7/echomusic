@@ -1,4 +1,4 @@
-/* Community Page - Standalone Styles (Adjusted to Match Prototype Layout) */
+ /* Community Page - Standalone Styles (Adjusted to Match Prototype Layout) */
 
 /* Base Container */
 .communitiesPageContainer {
@@ -91,8 +91,13 @@
 }
 
 @keyframes gradientFlow {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 .headerDescription {
@@ -205,7 +210,13 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  background: linear-gradient(90deg, #3b82f6 0%, #9333ea 35%, #ec4899 70%, #3b82f6 100%);
+  background: linear-gradient(
+    90deg,
+    #3b82f6 0%,
+    #9333ea 35%,
+    #ec4899 70%,
+    #3b82f6 100%
+  );
   background-size: 300% 300%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -772,7 +783,7 @@
   text-align: left;
   gap: 12px;
   padding: 20px;
-  margin-top:20px;
+  margin-top: 20px;
 }
 
 .discoverHeader {
@@ -867,7 +878,6 @@
   border-radius: 24px;
   border: 1px solid rgba(255, 255, 255, 0.15);
   transition: all 0.4s ease;
-
 }
 
 .challengeHeader {
@@ -911,18 +921,35 @@
 
 /* ===== ANIMATIONS ===== */
 @keyframes blobPulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(1.05); }
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
 }
 
 @keyframes iconPulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
 }
 
 @keyframes gradientFlow {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 /* ===== RESPONSIVE ===== */
@@ -933,8 +960,13 @@
     padding: 0 20px 60px;
   }
 
+  /* Move sidebar to bottom on smaller screens */
   .contentRight {
-    order: -1;
+    order: 1;
+  }
+
+  .contentLeft {
+    order: 0;
   }
 
   .posts.featuredGrid {
@@ -982,14 +1014,17 @@
 
   .actionsLeft {
     justify-content: space-between;
+    width: 100%;
   }
 
   .eventButtons {
     flex-direction: column;
+    width: 100%;
   }
 
   .enterBtn {
     width: 100%;
+    justify-content: center;
   }
 
   .discoverSection .categoryCard {
@@ -1004,6 +1039,37 @@
 
   .categoryEnterBtn.joinBtn {
     align-self: stretch;
+    width: 100%;
+    padding: 12px;
+    text-align: center;
+  }
+
+  /* Music Player Adjustments */
+  .trackInfo {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .trackDetails {
+    min-width: 100%;
+    order: 1;
+    text-align: center;
+    margin-top: 8px;
+  }
+
+  .trackIcon {
+    margin: 0 auto;
+  }
+
+  .playBtn {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+  }
+
+  .currentTrack {
+    position: relative;
+    padding-top: 20px;
   }
 }
 
@@ -1022,6 +1088,24 @@
 
   .feedSection,
   .sidebarSection {
-    padding: 20px;
+    padding: 16px;
+  }
+
+  .postCard.featuredCard {
+    padding: 16px;
+  }
+
+  .feedTabs.categoryTabs {
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .feedTabs.categoryTabs::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+  }
+
+  .categoryTab {
+    white-space: nowrap;
   }
 }

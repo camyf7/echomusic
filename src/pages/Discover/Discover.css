@@ -442,6 +442,7 @@
    
    .recomendado-card:hover .recomendado-img {
      transform: scale(1.1);
+     padding: 10px;
    }
    
    .recomendado-info {
