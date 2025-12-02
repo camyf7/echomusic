@@ -404,27 +404,43 @@ export default function TopoResponsivo() {
                 {menuOpen && (
                   <div className="profile-dropdown-dark">
                     <ul>
-                      <li className="dropdown-link">
-                        <Link to="/profile" onClick={() => setMenuOpen(false)}>
+                      <li>
+                        <Link
+                          to="/profile"
+                          className="dropdown-link"
+                          onClick={() => setMenuOpen(false)}
+                        >
                           <FaUser /> Perfil
                         </Link>
                       </li>
-                      <li className="dropdown-link">
-                        <Link to="/minhas-musicas" onClick={() => setMenuOpen(false)}>
+
+                      <li>
+                        <Link
+                          to="/minhas-musicas"
+                          className="dropdown-link"
+                          onClick={() => setMenuOpen(false)}
+                        >
                           <FaMusic /> Minhas músicas
                         </Link>
                       </li>
-                      <li className="dropdown-link">
-                        <Link to="/configuracoes" onClick={() => setMenuOpen(false)}>
+
+                      <li>
+                        <Link
+                          to="/configuracoes"
+                          className="dropdown-link"
+                          onClick={() => setMenuOpen(false)}
+                        >
                           <FaCog /> Configurações
                         </Link>
                       </li>
+
                       <li className="logout-item" onClick={handleLogout}>
                         <FaSignOutAlt /> Sair
                       </li>
                     </ul>
                   </div>
                 )}
+
               </div>
             </>
           ) : (

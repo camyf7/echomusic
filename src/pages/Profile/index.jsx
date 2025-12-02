@@ -355,9 +355,6 @@ const handleAvatarChange = (e) => {
     reader.readAsDataURL(file)
   }
 
-  // ===========================
-  // Restante do código permanece igual...
-  // ===========================
   const handlePrivacyToggle = (key) => {
     setPrivacySettings((prev) => ({ ...prev, [key]: !prev[key] }))
   }
@@ -512,18 +509,26 @@ const handleAvatarChange = (e) => {
               <Link to="/playlist" className="btn btn-small">Ver Playlists</Link>
             </div>
             <div className="playlists-grid">
-              {["Domingo Chill","Rock Nacional","Noite Romântica"].map((name,i)=>{
-                const image = name==="Domingo Chill"?domingo:name==="Rock Nacional"?rock:noiteromantica
+            {["Domingo Chill","Rock Nacional","Noite Romântica"].map((name,i)=>{
+                const image = 
+                  name === "Domingo Chill" ? domingo :
+                  name === "Rock Nacional" ? rock :
+                  noiteromantica
+
+                // Se for Rock Nacional → envia para /playlist
+                const Wrapper = name === "Rock Nacional" ? Link : "div"
+                const wrapperProps = name === "Rock Nacional" ? { to: "/playlist" } : {}
+
                 return (
-                  <div className="playlist-card" key={i}>
+                  <Wrapper className="playlist-card" key={i} {...wrapperProps}>
                     <div className="cover" style={{backgroundImage:`url(${image})`}}/>
                     <div className="playlist-info">
                       <div className="playlist-name">{name}</div>
                       <div className="playlist-meta">15 músicas • 1h 22min</div>
                     </div>
-                  </div>
+                  </Wrapper>
                 )
-              })}
+            })}
               <div className="playlist-card empty"><div className="placeholder">Criar nova playlist</div></div>
             </div>
           </section>

@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from "react";
 import "./Playlist.css";
-import { IoMdPlay, IoMdPause, IoMdHeartEmpty, IoMdSkipBackward, IoMdSkipForward, IoMdRepeat } from "react-icons/io";
+import {
+  IoMdPlay,
+  IoMdPause,
+  IoMdHeartEmpty,
+  IoMdSkipBackward,
+  IoMdSkipForward,
+  IoMdRepeat
+} from "react-icons/io";
 import { MdShare, MdPlaylistAdd } from "react-icons/md";
 import { FiClock } from "react-icons/fi";
 import { BsThreeDots } from "react-icons/bs";
@@ -11,34 +18,29 @@ import capaBrasileira from "./../../assets/capa-playlist.png";
 export default function Playlist() {
   const {
     playTrack,
-    nextTrack,
-    prevTrack,
-    setRepeat,
-    repeat,
-    currentTrackIndex,
-    isPlaying,
     setIsPlaying,
-    tracks,
+    isPlaying,
+    currentTrackIndex,
     setPlaylistTracks,
+    tracks,
     playlistBR
   } = usePlayer();
 
   const [formattedTracks, setFormattedTracks] = useState([]);
 
+  // 🎵 Carrega APENAS músicas brasileiras
   useEffect(() => {
-    const loadPlaylist = async () => {
-      await setPlaylistTracks(playlistBR, 0);
-    };
-    loadPlaylist();
+    setPlaylistTracks(playlistBR, 0);
   }, []);
 
   useEffect(() => {
-    setFormattedTracks(tracks.map((track, index) => ({
-      ...track,
-      id: index,
-      number: index + 1,
-      album: "Brasil Hits"
-    })));
+    setFormattedTracks(
+      tracks.map((track, index) => ({
+        ...track,
+        id: index,
+        number: index + 1,
+      }))
+    );
   }, [tracks]);
 
   const handlePlay = (index) => {
@@ -70,6 +72,7 @@ export default function Playlist() {
             <div className="pl-type">Playlist pública</div>
             <h1 className="pl-title">{playlistHeader.title}</h1>
             <p className="pl-description">{playlistHeader.description}</p>
+
             <div className="pl-meta">
               <span>{playlistHeader.creator}</span>
               <div className="pl-separator" />
@@ -77,10 +80,9 @@ export default function Playlist() {
               <div className="pl-separator" />
               <span>
                 {formattedTracks.reduce((acc, t) => {
-                  const [min, sec] = t.duration?.split(":").map(Number) || [0, 0];
+                  const [min, sec] = t.duration.split(":").map(Number);
                   return acc + min * 60 + sec;
-                }, 0)}
-                {" s"}
+                }, 0)}s
               </span>
               <div className="pl-separator" />
               <span>{playlistHeader.followers} seguidores</span>
@@ -89,14 +91,27 @@ export default function Playlist() {
             <div className="pl-actions">
               <button className="pl-action-btn pl-play-btn" onClick={() => handlePlay(0)}>
                 {isPlaying && currentTrackIndex === 0 ? (
-                  <><IoMdPause size={22} /> Pausar</>
+                  <>
+                    <IoMdPause size={22} /> Pausar
+                  </>
                 ) : (
-                  <><IoMdPlay size={22} /> Reproduzir</>
+                  <>
+                    <IoMdPlay size={22} /> Reproduzir
+                  </>
                 )}
               </button>
-              <button className="pl-icon-btn" onClick={prevTrack}><IoMdSkipBackward size={22} /></button>
-              <button className="pl-icon-btn" onClick={nextTrack}><IoMdSkipForward size={22} /></button>
-              <button className={`pl-icon-btn ${repeat ? "active" : ""}`} onClick={() => setRepeat(!repeat)}><IoMdRepeat size={22} /></button>
+
+              <button className="pl-icon-btn" onClick={() => playTrack(currentTrackIndex - 1)}>
+                <IoMdSkipBackward size={22} />
+              </button>
+              <button className="pl-icon-btn" onClick={() => playTrack(currentTrackIndex + 1)}>
+                <IoMdSkipForward size={22} />
+              </button>
+
+              <button className="pl-icon-btn">
+                <IoMdRepeat size={22} />
+              </button>
+
               <button className="pl-icon-btn"><IoMdHeartEmpty size={20} /></button>
               <button className="pl-icon-btn"><MdShare size={20} /></button>
               <button className="pl-icon-btn"><BsThreeDots size={20} /></button>
@@ -115,20 +130,33 @@ export default function Playlist() {
           </div>
 
           {formattedTracks.map((track) => (
-            <div key={track.id} className={`pl-track-item ${currentTrackIndex === track.id ? "playing" : ""}`}>
+            <div
+              key={track.id}
+              className={`pl-track-item ${currentTrackIndex === track.id ? "playing" : ""}`}
+            >
               <div className="pl-track-number" onClick={() => handlePlay(track.id)}>
                 <span className="number">{track.number}</span>
                 <span className="play-indicator">
-                  {currentTrackIndex === track.id && isPlaying ? <IoMdPause size={18} /> : <IoMdPlay size={18} />}
+                  {currentTrackIndex === track.id && isPlaying ? (
+                    <IoMdPause size={18} />
+                  ) : (
+                    <IoMdPlay size={18} />
+                  )}
                 </span>
               </div>
 
               <div className="pl-track-info" onClick={() => handlePlay(track.id)}>
-                <div className="pl-track-cover"><img src={track.cover} alt={track.title} /></div>
-                <div className="pl-track-details"><h4>{track.title}</h4><p>{track.artist}</p></div>
+                <div className="pl-track-cover">
+                  <img src={track.cover} alt={track.title} />
+                </div>
+                <div className="pl-track-details">
+                  <h4>{track.title}</h4>
+                  <p>{track.artist}</p>
+                </div>
               </div>
 
               <div className="pl-track-album">{track.album}</div>
+
               <div className="pl-track-duration">{track.duration}</div>
 
               <div className="pl-track-actions">

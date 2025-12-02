@@ -7,45 +7,31 @@ import { usePlayer } from "../../contexts/PlayerContext";
 
 export default function Buscar() {
   const location = useLocation();
-  
-  // Suporta busca tanto por query params (?q=termo) quanto por state do navigate
   const queryParams = new URLSearchParams(location.search);
-  const searchTermFromUrl = queryParams.get("q") || "";
-  const searchTermFromState = location.state?.query || "";
-  const resultsFromState = location.state?.results || null;
-  
-  const searchTerm = searchTermFromUrl || searchTermFromState;
+  const searchTerm = queryParams.get("q") || location.state?.query || "";
 
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const { playTrack, currentTrackIndex, isPlaying, setIsPlaying, setPlaylistTracks } = usePlayer();
+  const { playTrack, currentTrackIndex, isPlaying, setPlaylistTracks } = usePlayer();
+
+  const backend = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
+  // Normaliza tracks do backend
+  const normalizeForPlayer = (tracks) =>
+    tracks.map((t, index) => ({
+      id: t.id,
+      title: t.title,
+      artist: t.artist,
+      album: t.album,
+      src: t.audio_url.startsWith("http") ? t.audio_url : `${backend}${t.audio_url}`,
+      cover: t.cover.startsWith("http") ? t.cover : `${backend}${t.cover}`,
+      number: index + 1,
+    }));
 
   useEffect(() => {
-    // Se veio com resultados do state (do Topo.jsx), usa direto
-    if (resultsFromState) {
-      console.log("✅ Usando resultados do state:", resultsFromState);
-      setResults(resultsFromState || []);
-      
-      // Configura o player
-      setPlaylistTracks(
-        (resultsFromState || []).map((track, i) => ({
-          ...track,
-          id: track.id || i,
-          number: i + 1,
-          album: track.album || "Resultado da Busca",
-          cover: track.cover || "/default-cover.jpg",
-        })),
-        0
-      );
-      
-      setLoading(false);
-      return;
-    }
-
-    // Senão, faz a busca na API
     const fetchResults = async () => {
-      if (!searchTerm || searchTerm.trim() === "") {
+      if (!searchTerm.trim()) {
         setResults([]);
         setLoading(false);
         return;
@@ -53,49 +39,21 @@ export default function Buscar() {
 
       try {
         setLoading(true);
-        console.log("🔎 Buscando:", searchTerm);
-        
-        const backend = import.meta.env.VITE_API_URL || "http://localhost:3000";
-        const url = `${backend}/music/search?q=${encodeURIComponent(searchTerm)}`;
-        
-        console.log("🌐 URL:", url);
-        
-        const response = await fetch(url);
-        
+        const response = await fetch(`${backend}/tracks/search?q=${encodeURIComponent(searchTerm)}`);
         if (!response.ok) {
-          console.error("❌ Erro HTTP:", response.status);
-          throw new Error(`Erro na requisição: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        console.log("📦 Dados recebidos:", data);
-        console.log("📊 Total de resultados:", data?.length || 0);
-
-        // Verifica se data é um array válido
-        if (!Array.isArray(data)) {
-          console.warn("⚠️ Resposta não é um array:", data);
+          console.error("HTTP Error:", response.status);
           setResults([]);
-          setLoading(false);
           return;
         }
-
+        const data = await response.json();
         setResults(data);
 
-        // Configura o player com os resultados
         if (data.length > 0) {
-          setPlaylistTracks(
-            data.map((track, i) => ({
-              ...track,
-              id: track.id || i,
-              number: i + 1,
-              album: track.album || "Resultado da Busca",
-              cover: track.cover || "/default-cover.jpg",
-            })),
-            0
-          );
+          const normalized = normalizeForPlayer(data);
+          setPlaylistTracks(normalized, 0); // só prepara a playlist
         }
       } catch (err) {
-        console.error("❌ Erro ao buscar músicas:", err);
+        console.error("Erro ao buscar:", err);
         setResults([]);
       } finally {
         setLoading(false);
@@ -103,14 +61,10 @@ export default function Buscar() {
     };
 
     fetchResults();
-  }, [searchTerm, resultsFromState]);
+  }, [searchTerm]);
 
   const handlePlay = (index) => {
-    if (index === currentTrackIndex) {
-      setIsPlaying(!isPlaying);
-    } else {
-      playTrack(index);
-    }
+    playTrack(index); // toca ou dá toggle
   };
 
   return (
@@ -120,14 +74,9 @@ export default function Buscar() {
       </h1>
 
       {loading ? (
-        <p className="search-loading">Carregando...</p>
+        <p>Carregando...</p>
       ) : results.length === 0 ? (
-        <div className="search-empty-container">
-          <p className="search-empty">Nenhuma música encontrada.</p>
-          <p className="search-empty-hint">
-            Tente buscar por outro termo ou verifique se há músicas cadastradas no sistema.
-          </p>
-        </div>
+        <p>Nenhuma música encontrada.</p>
       ) : (
         <div className="search-results">
           <div className="sr-header">
@@ -140,7 +89,7 @@ export default function Buscar() {
 
           {results.map((track, index) => (
             <div
-              key={track.id || index}
+              key={track.id}
               className={`sr-item ${currentTrackIndex === index ? "playing" : ""}`}
             >
               <div className="sr-number" onClick={() => handlePlay(index)}>
@@ -148,55 +97,26 @@ export default function Buscar() {
               </div>
 
               <div className="sr-title-info" onClick={() => handlePlay(index)}>
-                <img 
-                  src={track.cover || "/default-cover.jpg"} 
-                  alt={track.title || "Sem título"} 
+                <img
+                  src={track.cover.startsWith("http") ? track.cover : `${backend}${track.cover}`}
+                  alt={track.title}
                   className="sr-cover"
-                  onError={(e) => {
-                    e.target.src = "/default-cover.jpg";
-                  }}
                 />
                 <div className="sr-details">
-                  <h4>{track.title || "Sem título"}</h4>
-                  <p>{track.artist || "Artista desconhecido"}</p>
+                  <h4>{track.title}</h4>
+                  <p>{track.artist}</p>
                 </div>
               </div>
 
-              <div className="sr-artist">{track.artist || "Artista desconhecido"}</div>
-              <div className="sr-album">{track.album || "Álbum desconhecido"}</div>
+              <div className="sr-artist">{track.artist}</div>
+              <div className="sr-album">{track.album}</div>
 
               <div className="sr-actions">
-                <button className="sr-action-btn" title="Curtir">
-                  <IoMdHeartEmpty />
-                </button>
-                <button className="sr-action-btn" title="Adicionar à playlist">
-                  <MdPlaylistAdd />
-                </button>
+                <IoMdHeartEmpty />
+                <MdPlaylistAdd />
               </div>
             </div>
           ))}
-        </div>
-      )}
-
-      {/* Debug info - remova em produção */}
-      {process.env.NODE_ENV === 'development' && (
-        <div style={{
-          position: 'fixed',
-          bottom: '10px',
-          right: '10px',
-          background: 'rgba(0,0,0,0.8)',
-          color: '#0f0',
-          padding: '10px',
-          borderRadius: '4px',
-          fontSize: '11px',
-          maxWidth: '300px',
-          zIndex: 9999
-        }}>
-          <div><strong>DEBUG:</strong></div>
-          <div>Termo: {searchTerm}</div>
-          <div>Resultados: {results.length}</div>
-          <div>Loading: {loading ? 'sim' : 'não'}</div>
-          <div>State results: {resultsFromState ? 'sim' : 'não'}</div>
         </div>
       )}
     </div>

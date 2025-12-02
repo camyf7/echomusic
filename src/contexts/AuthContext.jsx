@@ -8,7 +8,6 @@ const AuthContext = createContext()
 export const AuthProvider = ({ children }) => {
   const initialLoggedState = isLogged()
 
-  // Corrige o retorno: se vier objeto com { user: {...} }, pega só user
   const storedUser = initialLoggedState ? getUser() : null
   const initialUserState =
     storedUser && storedUser.user       // caso salvo como { user: {...} }

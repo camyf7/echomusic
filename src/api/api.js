@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3000"; // ou URL do seu backend
+const API_URL = "http://localhost:3000"; 
 
 export const getUserProfile = async (token) => {
   const res = await fetch(`${API_URL}/user/me`, {

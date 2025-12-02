@@ -22,18 +22,30 @@ import Die from "../../assets/musica_die.png";
 import { usePlayer } from "../../contexts/PlayerContext";
 
 export default function HomePage() {
-  const navigate = useNavigate();
-  const {
-    isPlaying,
-    setIsPlaying,
-    volume,
-    setVolume,
-    progress,
-    audioRef,
-    currentTrack,
-    nextTrack,
-    prevTrack,
-  } = usePlayer();
+ const {
+  isPlaying,
+  setIsPlaying,
+  volume,
+  setVolume,
+  progress,
+  audioRef,
+  tracks,
+  currentTrackIndex,
+  playTrack,
+} = usePlayer();
+
+// Track atual
+const currentTrack = tracks[currentTrackIndex];
+
+// Funções para avançar/voltar
+const nextTrack = () => {
+  if (currentTrackIndex + 1 < tracks.length) playTrack(currentTrackIndex + 1);
+};
+
+const prevTrack = () => {
+  if (currentTrackIndex - 1 >= 0) playTrack(currentTrackIndex - 1);
+};
+
 
   const [liked, setLiked] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
