@@ -84,7 +84,9 @@ export default function SignIn() {
   return (
     <div className="signin-wrapper">
       <div className="signin-card">
-        <img src={logo} alt="EchoMusic Logo" className="signin-logo" />
+      <span className="logo-text">EchoMusic</span>
+      
+
         <h2>Entrar na EchoMusic</h2>
         <p className="signin-subtitle">Bem-vindo de volta ao ritmo.</p>
 

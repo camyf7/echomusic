@@ -416,7 +416,7 @@ export default function TopoResponsivo() {
 
                       <li>
                         <Link
-                          to="/minhas-musicas"
+                          to="/playlist"
                           className="dropdown-link"
                           onClick={() => setMenuOpen(false)}
                         >

@@ -54,7 +54,7 @@ export default function Playlist() {
   const playlistHeader = {
     title: "Vibes Brasileiras",
     description: "As melhores músicas nacionais para relaxar, dançar e curtir. Seleção especial de hits brasileiros.",
-    creator: "Echo Music",
+    creator: "EchoMusic",
     cover: capaBrasileira,
     followers: "980",
   };
@@ -114,7 +114,7 @@ export default function Playlist() {
 
               <button className="pl-icon-btn"><IoMdHeartEmpty size={20} /></button>
               <button className="pl-icon-btn"><MdShare size={20} /></button>
-              <button className="pl-icon-btn"><BsThreeDots size={20} /></button>
+             
             </div>
           </div>
         </div>

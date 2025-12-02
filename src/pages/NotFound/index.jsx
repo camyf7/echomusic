@@ -140,13 +140,6 @@ export default function NotFound404() {
        <br></br>
        <br></br>
        
-       
-        
-
-        {/* Mensagem extra */}
-        <p className="mt-10 text-sm text-purple-400/60 italic">
-          "A vida sem música seria um erro." - Friedrich Nietzsche
-        </p>
       </div>
     </div>
   );

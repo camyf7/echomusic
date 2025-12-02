@@ -94,7 +94,7 @@ export default function SignUp() {
   return (
     <div className="signup-wrapper">
       <div className="signup-card">
-        <img src={logo} alt="EchoMusic Logo" className="signup-logo" />
+      <span className="logo-text">EchoMusic</span>
 
         <h2>Crie sua conta</h2>
         <p className="signup-subtitle">Entre no ritmo com a EchoMusic.</p>
