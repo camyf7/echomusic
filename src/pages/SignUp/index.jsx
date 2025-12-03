@@ -1,13 +1,13 @@
 "use client";
 
 import "./SignUp.css";
-import logo from "../../assets/logo.png";
 import { FaGoogle, FaFacebookF } from "react-icons/fa";
 import { useState } from "react";
 import { signInWithGooglePopup } from "../../firebase";
 import { useNavigate, Link } from "react-router-dom";
 import { doLogin } from "../../lib/authHandler";
 import { useAuth } from "../../contexts/AuthContext";
+import { API_URL } from "../../config/api";
 
 export default function SignUp() {
   const [loading, setLoading] = useState(false);
@@ -17,18 +17,29 @@ export default function SignUp() {
     email: "",
     password: "",
   });
+
   const navigate = useNavigate();
   const { setLogged, setUser } = useAuth();
 
-  // CADASTRO + LOGIN AUTOMÁTICO
+  // =============================
+  // 🔹 Função para atualizar inputs
+  // =============================
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // =============================
+  // 🔹 Cadastro com API
+  // =============================
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     setError(null);
     setLoading(true);
 
     try {
-      // 1 ▪ Cadastro
-      const res = await fetch("http://localhost:3000/user/register", {
+      const res = await fetch(`${API_URL}/user/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -39,29 +50,28 @@ export default function SignUp() {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Erro ao criar conta");
+      if (!res.ok) throw new Error(data.error || "Erro ao criar conta.");
 
-      // Mostra mensagem de sucesso
       alert("Usuário cadastrado com sucesso!");
-
-      // 2 ▪ Redireciona para página de login
-      navigate("/signin");
+      navigate("/signin"); // redireciona para login
     } catch (err) {
-      console.error("Erro no cadastro/login:", err);
-      setError(err.message || "Erro ao criar conta.");
+      console.error("Erro no cadastro:", err);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  // LOGIN COM GOOGLE
+  // =============================
+  // 🔹 Cadastro/Login com Google
+  // =============================
   const handleGoogleSignIn = async () => {
     setLoading(true);
     setError(null);
 
     try {
       const result = await signInWithGooglePopup();
-      if (!result) throw new Error("Falha ao obter informações do Google.");
+      if (!result) throw new Error("Falha ao logar com o Google.");
 
       const token = await result.user.getIdToken();
       const userData = {
@@ -75,30 +85,28 @@ export default function SignUp() {
       setUser(userData);
       setLogged(true);
 
-      alert("Usuário logado com sucesso!");
-      navigate("/signin"); // redireciona pro login ou profile se quiser
+      alert("Login com Google realizado!");
+      navigate("/signin");
     } catch (err) {
-      console.error("Erro ao cadastrar com Google:", err);
-      setError(err.message || "Erro ao fazer cadastro.");
+      console.error("Erro no Google Sign-In:", err);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  // INPUT GENÉRICO
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
+  // =============================
+  // 🔹 Interface
+  // =============================
   return (
     <div className="signup-wrapper">
       <div className="signup-card">
-      <span className="logo-text">EchoMusic</span>
+        <span className="logo-text">EchoMusic</span>
 
         <h2>Crie sua conta</h2>
         <p className="signup-subtitle">Entre no ritmo com a EchoMusic.</p>
 
+        {/* FORMULÁRIO */}
         <form onSubmit={handleSubmit}>
           <div className="input-group">
             <label>Nome Completo</label>
@@ -141,10 +149,12 @@ export default function SignUp() {
           </button>
         </form>
 
+        {/* DIVISOR */}
         <div className="divider">
           <span>ou cadastre com</span>
         </div>
 
+        {/* LOGIN SOCIAL */}
         <div className="social-login">
           <button
             className="social-btn google"
@@ -161,10 +171,12 @@ export default function SignUp() {
           </button>
         </div>
 
+        {/* LINK PARA LOGIN */}
         <p className="signup-login">
           Já tem uma conta? <Link to="/signin">Entrar</Link>
         </p>
 
+        {/* ERROS */}
         {error && <p style={{ color: "red", marginTop: "12px" }}>{error}</p>}
       </div>
     </div>
