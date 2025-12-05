@@ -1,33 +1,61 @@
 import React, { useState } from "react";
 import "./SignIn.css";
-import logo from "../../assets/logo.png";
 import { FaGoogle, FaFacebookF } from "react-icons/fa";
 import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../../firebase";
 import { doLogin } from "../../lib/authHandler";
 import { useAuth } from "../../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { API_URL } from "../../config/api";
 
 export default function SignIn() {
   const { setUser, setLogged } = useAuth();
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState({
+    email: "",
+    password: ""
+  });
 
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  // =============================
+  // 🔹 Atualizar inputs
+  // =============================
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // =============================
+  // 🔹 Login normal com API Railway
+  // =============================
   const handleLogin = async () => {
-    if (!email || !password) return alert("Preencha email e senha");
+    const { email, password } = formData;
+
+    if (!email || !password) {
+      setError("Preencha email e senha");
+      return;
+    }
+
+    setError(null);
+    setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:3000/user/login", {
+      const res = await fetch(`${API_URL}/user/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify(formData),
       });
 
       const data = await res.json();
 
-      if (data.error) return alert(data.error);
+      if (!res.ok || data.error) {
+        setError(data.error || "Erro ao fazer login");
+        setLoading(false);
+        return;
+      }
 
       const token = data.token;
       const userData = {
@@ -37,22 +65,25 @@ export default function SignIn() {
         avatar_url: data.user.avatar_url || null,
       };
 
+      // Salva token + user
       doLogin(token, userData);
       setUser(userData);
       setLogged(true);
 
-      // 🔹 Alerta não bloqueante
-      setTimeout(() => {
-        alert("Usuário logado com sucesso!");
-        navigate("/profile"); // redireciona
-      }, 10);
+      setLoading(false);
+      alert("Usuário logado com sucesso!");
+      navigate("/profile");
 
     } catch (error) {
       console.error("Erro no login:", error);
-      alert("Erro ao tentar entrar");
+      setError("Erro ao conectar ao servidor");
+      setLoading(false);
     }
   };
 
+  // =============================
+  // 🔹 Login com Google
+  // =============================
   const handleGoogleSignIn = async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
@@ -70,13 +101,10 @@ export default function SignIn() {
       setUser(userData);
       setLogged(true);
 
-      setTimeout(() => {
-        alert("Usuário logado com sucesso!");
-        navigate("/profile");
-      }, 10);
-
+      alert("Usuário logado com sucesso!");
+      navigate("/profile");
     } catch (error) {
-      console.error("Erro ao fazer login com Google:", error);
+      console.error("Erro no login com Google:", error);
       alert("Falha ao entrar com Google");
     }
   };
@@ -84,39 +112,43 @@ export default function SignIn() {
   return (
     <div className="signin-wrapper">
       <div className="signin-card">
-      <span className="logo-text">EchoMusic</span>
-      
+        <span className="logo-text">EchoMusic</span>
 
         <h2>Entrar na EchoMusic</h2>
         <p className="signin-subtitle">Bem-vindo de volta ao ritmo.</p>
 
-        <form>
+        <form onSubmit={(e) => e.preventDefault()}>
           <div className="input-group">
             <label>Email</label>
             <input
+              name="email"
               type="email"
               placeholder="seuemail@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={formData.email}
+              onChange={handleChange}
             />
           </div>
 
           <div className="input-group">
             <label>Senha</label>
             <input
+              name="password"
               type="password"
               placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={formData.password}
+              onChange={handleChange}
             />
           </div>
+
+          {error && <p className="error-message">{error}</p>}
 
           <button
             type="button"
             className="signin-btn"
             onClick={handleLogin}
+            disabled={loading}
           >
-            Entrar
+            {loading ? "Entrando..." : "Entrar"}
           </button>
         </form>
 
